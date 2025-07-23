@@ -1,6 +1,6 @@
 This is a markdown file for claude code to understand what each of the routes is supposed to contain
 
-We are building an application for students to sign up and 
+We are building an application for college students at Baylor's ACM chapter to sign up for a event during various months called "Language Month," where a new programming language is taught. The details of the routes needed are provided below.
 
 You should focus only on the frontend, using dummy data. Assume that data will have to be fetched and always default to server components. Whenever you find yourself duplicating code, make a component for it in the `src/components` directory. 
 
