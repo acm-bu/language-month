@@ -1,10 +1,17 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
+First, make sure to set up proper environment variables in an `.env.local` file. For a basic local setup:
 
-First, run the development server:
+```
+LANGMONTH_DB_TYPE="local"
+LANGMONTH_DB_PATH="localdb/db.sqlite"
+```
+
+Then, install and run the development server:
 
 ```bash
+bun install
 bun dev
 ```
 
@@ -23,8 +30,13 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+We are also using Drizzle ORM + libsql for the database. Learn more about these technologies:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [Drizzle](https://orm.drizzle.team/)
+- [LibSQL](https://github.com/tursodatabase/libsql)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Environment Variables
+
+- `LANGMONTH_DB_TYPE` ("remote" | "local")
+- `LANGMONTH_DB_PATH` (string) - the url to a libsql database (turso preferred) or a local filepath depending on the type
+- `LANGMONTH_DB_TOKEN` (string) - the token to connect to the database (if required)
