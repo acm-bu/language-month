@@ -40,3 +40,8 @@ We are also using Drizzle ORM + libsql for the database. Learn more about these 
 - `LANGMONTH_DB_TYPE` ("remote" | "local")
 - `LANGMONTH_DB_PATH` (string) - the url to a libsql database (turso preferred) or a local filepath depending on the type
 - `LANGMONTH_DB_TOKEN` (string) - the token to connect to the database (if required)
+
+
+## Connections still needed:
+- object storage
+- email system
