@@ -22,3 +22,19 @@ export function findPuzzleInCourse(course: LanguageCourse, id: string): Puzzle |
 export function findCourse(language: string): LanguageCourse | null {
   return languageCourses.find((l) => l.language === language) ?? null;
 }
+
+export function findCourseAndPuzzle(language: string, id: string): { puzzle: Puzzle, course: LanguageCourse } | null {
+  const course = findCourse(language)
+
+  if (!course) {
+    return null;
+  }
+
+  const puzzle = findPuzzleInCourse(course, id);
+
+  if (!puzzle) {
+    return null;
+  }
+
+  return { course, puzzle };
+}

@@ -3,20 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "bunx --bun next dev",
+    "build": "bunx --bun next build",
+    "start": "bunx --bun next start",
+    "lint": "bunx --bun next lint"
   },
   "dependencies": {
     "@libsql/client": "^0.15.10",
+    "@mdx-js/loader": "^3.1.0",
+    "@next/mdx": "^15.4.3",
+    "@types/bun": "^1.2.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/mdx": "^2.0.13",
     "daisyui": "^5.0.46",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.3",
+    "jsonwebtoken": "^9.0.2",
+    "mdx": "^0.3.1",
     "next": "15.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "supabase": "^2.31.8"
+    "rehype-pretty-code": "^0.14.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx-frontmatter": "^5.2.0"
   },
   "devDependencies": {
     "typescript": "^5",
