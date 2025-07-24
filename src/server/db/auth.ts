@@ -1,8 +1,10 @@
 import { eq } from "drizzle-orm";
 import { Database } from ".";
-import type { PublicUser, Session,  User } from "./schema";
+import type { PublicUser, Session, User } from "./schema";
 import { sessionsTable, usersTable } from "./schema"
 import { randomUUIDv7 } from "bun";
+import { getSessionFromCookie } from "../cookie";
+import { redirect } from "next/navigation";
 
 export async function createUser(db: Database, email: string, firstName: string, lastName: string, password: string): Promise<User> {
   const hashedPassword = Bun.password.hashSync(password);
@@ -104,3 +106,13 @@ export function userToPublic(user: User): PublicUser {
   }
 }
 
+
+export async function forceAuthenticated(db: Database, redirectTo?: string): Promise<{ user: User, session: Session }> {
+  const join = await getSessionFromCookie(db);
+
+  if (!join) {
+    throw redirect(redirectTo ?? "/auth");
+  }
+
+  return join;
+}
