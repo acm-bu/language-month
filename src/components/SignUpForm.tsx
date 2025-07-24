@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signUp } from "@/actions/sign-up";
 
 interface SignUpFormProps {
   onToggle: () => void;
@@ -23,12 +24,8 @@ export default function SignUpForm({ onToggle }: SignUpFormProps) {
     }
 
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Sign up:", { firstName, lastName, email, password });
-      setIsLoading(false);
-    }, 1000);
+    await signUp(email, firstName, lastName, password);
+    setIsLoading(false);
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import { getDbFromEnv } from "@/server/db"
 import { signIn } from "@/server/db/auth";
+import { redirect } from "next/navigation";
 
 export async function signInWithEmail(email: string, password: string) {
   const db = getDbFromEnv();
@@ -12,5 +13,5 @@ export async function signInWithEmail(email: string, password: string) {
     return new Error("Failed to sign in: invalid email or password");
   }
 
-  return session
+  redirect("/")
 }

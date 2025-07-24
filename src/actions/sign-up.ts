@@ -1,7 +1,9 @@
 "use server"
 
+import { setSessionCookie } from "@/server/cookie";
 import { getDbFromEnv } from "@/server/db";
-import { createUser, signIn, userToPublic } from "@/server/db/auth";
+import { createUser, signIn } from "@/server/db/auth";
+import { redirect } from "next/navigation";
 
 
 export async function signUp(email: string, firstName: string, lastName: string, password: string) {
@@ -17,11 +19,14 @@ export async function signUp(email: string, firstName: string, lastName: string,
 
   const db = getDbFromEnv();
 
-  const user = await createUser(db, email, firstName, lastName, password);
-  const session = await signIn(db, email, password)!;
-  const publicUser = userToPublic(user);
+  await createUser(db, email, firstName, lastName, password);
+  const session = await signIn(db, email, password);
+  if (!session) {
+    throw new Error("Sever error: failed to create session after sign up");
+  }
 
-  return { user: publicUser, session }
+  await setSessionCookie(session);
+  redirect("/");
 }
 
 function validateEmail(email: string): string | null {

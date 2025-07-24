@@ -1,5 +1,6 @@
 "use client";
 
+import { signInWithEmail } from "@/actions/sign-in";
 import { useState } from "react";
 
 interface SignInFormProps {
@@ -15,11 +16,9 @@ export default function SignInForm({ onToggle }: SignInFormProps) {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Sign in:", { email, password });
-      setIsLoading(false);
-    }, 1000);
+    await signInWithEmail(email, password);
+
+    setIsLoading(false);
   };
 
   return (
