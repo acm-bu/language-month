@@ -31,3 +31,25 @@ export const resetTable = sqliteTable("resets", {
   key: text().notNull(),
 });
 export type ResetToken = InferSelectModel<typeof resetTable>;
+
+export const solutionsTable = sqliteTable("solutions", {
+  id: text().notNull().unique().primaryKey(),
+  userId: text().notNull().references(() => usersTable.id),
+  explanation: text().notNull(),
+  code: text().notNull(),
+  language: text().notNull(),
+  timestamp: int({ mode: "timestamp" }).notNull().default(new Date()),
+});
+
+export type Solution = InferSelectModel<typeof solutionsTable>;
+
+export const commentsTable = sqliteTable("comments", {
+  id: text().notNull().unique().primaryKey(),
+  replyTo: text(),
+  content: text({ length: 100000 }).notNull(),
+  author: text().notNull().references(() => usersTable.id),
+  timestamp: int({ mode: "timestamp" }).notNull().default(new Date()),
+});
+
+
+export type Comment = InferSelectModel<typeof commentsTable>;

@@ -1,0 +1,24 @@
+import { languageCourses } from "./data";
+
+export interface LanguageCourse {
+  language: string;
+  dateOpen: Date;
+  description: string;
+  puzzles: Puzzle[];
+}
+
+export interface Puzzle {
+  id: string;
+  title: string;
+  date: Date;
+}
+
+
+
+export function findPuzzleInCourse(course: LanguageCourse, id: string): Puzzle | null {
+  return course.puzzles.find((p) => p.id === id) ?? null;
+} 
+
+export function findCourse(language: string): LanguageCourse | null {
+  return languageCourses.find((l) => l.language === language) ?? null;
+}
