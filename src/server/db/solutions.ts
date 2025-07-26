@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { Database } from ".";
-import { ShortenedSolution, Solution, solutionsTable } from "./schema";
+import { ShortenedSolution, Solution, solutionsTable, usersTable } from "./schema";
 import { findAllCourses, findCourse } from "../languages";
 import { notFound } from "next/navigation";
 import { randomUUIDv7 } from "bun";
@@ -10,6 +10,27 @@ export interface SolutionContext {
   code: string;
   language: string;
   puzzleId: string;
+}
+
+export async function getSolutionById(db: Database, solutionId: string) {
+  const join = await db
+    .select()
+    .from(solutionsTable)
+    .where(eq(solutionsTable.id, solutionId))
+    .innerJoin(usersTable, eq(solutionsTable.userId, usersTable.id))
+    .limit(1);
+
+  if (join.length !== 1) {
+    notFound();
+  }
+
+
+  const result = join[0];
+
+  return {
+    user: result.users,
+    solution: result.solutions,
+  }
 }
 
 export async function hasSolved(db: Database, userId: string, language: string, puzzleId: string, prefetchedSolutions?: ShortenedSolution[]): Promise<boolean> {
