@@ -9,12 +9,12 @@ export default function AuthButton() {
 
   useEffect(() => {
     const v = async () => {
-      const u = whoami();
+      const u = await whoami();
 
-      if (u !== null) {
-        setIsLoggedIn(true);
-      } else {
+      if (u.result === "ERR") {
         setIsLoggedIn(false);
+      } else {
+        setIsLoggedIn(true);
       }
 
     }

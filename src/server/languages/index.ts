@@ -24,6 +24,10 @@ export function findCourse(language: string): LanguageCourse | null {
   return languageCourses.find((l) => l.language === language) ?? null;
 }
 
+export function findAllCourses() {
+  return languageCourses;
+}
+
 export function findCourseAndPuzzle(language: string, id: string): { puzzle: Puzzle, course: LanguageCourse } | null {
   const course = findCourse(language)
 

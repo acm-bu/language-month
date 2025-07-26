@@ -1,13 +1,12 @@
 import { defineConfig } from "drizzle-kit";
 import path from "path";
 
-const root = path.resolve(__dirname, "..");
 
 export default defineConfig({
-  schema: path.join(root, "src/server/db/schema.ts"),
+  schema: "src/server/db/schema.ts",
   dialect: "turso",
-  out: path.join(root, "drizzle/local"),
+  out: "drizzle/local",
   dbCredentials: {
-    url: path.join(root, "localdb/db.sqlite")
+    url: "localdb/db.sqlite",
   }
 })
