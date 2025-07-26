@@ -4,6 +4,9 @@ import PuzzleDescription from "@/components/PuzzleDescription";
 import { findCourseAndPuzzle } from "@/server/languages";
 import SubmitButton from "@/components/SubmitButton";
 import NewPostForm from "@/components/NewPostForm";
+import { getSessionFromCookie } from "@/server/cookie";
+import { getDbFromEnv } from "@/server/db";
+import { getUserSolution } from "@/server/db/solutions";
 
 export default async function PuzzlePage({ params }: { params: Promise<{ language: string, puzzleId: string}> }) {
   const p = await params;
@@ -15,6 +18,11 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
     notFound();
   }
   const { puzzle } = found;
+
+  // Check if user has an existing solution
+  const db = getDbFromEnv();
+  const auth = await getSessionFromCookie(db);
+  const existingSolution = auth ? await getUserSolution(db, auth.user.id, language, puzzleId) : null;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -34,7 +42,7 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
             >
               View Solutions
             </Link>
-            <SubmitButton title={puzzle.title}/>
+            <SubmitButton title={puzzle.title} language={language} puzzleId={puzzleId} existingSolution={existingSolution}/>
           </div>
         </div>
       </div>

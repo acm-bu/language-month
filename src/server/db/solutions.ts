@@ -33,39 +33,17 @@ export async function getSolutionById(db: Database, solutionId: string) {
   }
 }
 
-export async function hasSolved(db: Database, userId: string, language: string, puzzleId: string, prefetchedSolutions?: ShortenedSolution[]): Promise<boolean> {
-  // if we already have fetched the user's solutions, we can just pass it in to avoid double fetching
-  const solutions = prefetchedSolutions === undefined
-    ? await getAllUserSolutions(db, userId, language)
-    : prefetchedSolutions;
+export async function hasSolved(db: Database, userId: string, language: string, puzzleId: string): Promise<boolean> {
+  const solutions = await db
+    .select()
+    .from(solutionsTable)
+    .where(and(
+      eq(solutionsTable.userId, userId),
+      eq(solutionsTable.language, language),
+      eq(solutionsTable.puzzleId, puzzleId),
+    ))
 
-  const course = findCourse(language);
-
-  // if we dont' have the course then we go to notFound rather than redirect
-  // since it means the user is somewhere they shouldn't be
-  if (!course) {
-    notFound();
-  }
-
-  const neededProgressionIndex = course.puzzles.findIndex(p => p.id === puzzleId);
-
-  // this is another case where we are specifying a puzzleId that doesn't
-  // exist, so we do the same thing as if there is no course
-  if (neededProgressionIndex === -1) {
-    notFound();
-  }
-
-  let currentProgressionIndex = -1;
-  // it doesn't really matter that this is O(n^2) since it's at most like 16
-  // puzzles (256 checks is nothing) and optimizing it is not worth the effort
-  for (const solution of solutions) {
-    const i = course.puzzles.findIndex(p => p.id === solution.puzzleId)
-    if (i > currentProgressionIndex) {
-      currentProgressionIndex = i;
-    }
-  }
-
-  return (currentProgressionIndex >= neededProgressionIndex)
+  return solutions.length === 1;
 }
 
 // this is the same as hasSolved except checks that a user is able to attempt the puzzle. 
@@ -211,4 +189,19 @@ export async function updateSolution(db: Database, userId: string, ctx: Solution
     .returning();
 
   return result[0]!;
+}
+
+// TODO - paginate this
+export async function getSolutionsForProblem(db: Database, language: string, puzzleId: string) {
+  const result = await db
+    .select()
+    .from(solutionsTable)
+    .where(and(
+      eq(solutionsTable.language, language),
+      eq(solutionsTable.puzzleId, puzzleId),
+    ))
+    .innerJoin(usersTable, eq(solutionsTable.userId, usersTable.id))
+
+
+  return result.map(r => { return { user: r.users, solution: r.solutions }});
 }

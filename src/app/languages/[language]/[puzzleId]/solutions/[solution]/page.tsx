@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findCourseAndPuzzle } from "@/server/languages";
-import { getSolutionById } from "@/server/db/solutions";
+import { getSolutionById, hasSolved } from "@/server/db/solutions";
 import { getDbFromEnv } from "@/server/db";
+import { forceAuthenticated } from "@/server/db/auth";
+import LockedScreen from "@/components/LockedScreen";
 
 interface SolutionPageProps {
   params: Promise<{
@@ -17,7 +19,15 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
   const { language, puzzleId, solution: solutionId } = p;
 
   const db = getDbFromEnv();
-  
+  const auth = await forceAuthenticated(db);
+  const solved = await hasSolved(db, auth.user.id, language, puzzleId);
+
+  if (!solved) {
+    <LockedScreen
+      backToCalendarHref={`/languages/${p.language}`}
+    />
+  }
+
   const found = findCourseAndPuzzle(language, puzzleId);
   if (!found) {
     notFound();
@@ -29,11 +39,11 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Link 
-          href={`/languages/${language}/${puzzleId}/solutions`} 
+        <Link
+          href={`/languages/${language}/${puzzleId}/solutions`}
           className="btn btn-ghost btn-sm mb-4"
         >
-          ê Back to Solutions
+          ¬ê Back to Solutions
         </Link>
 
         <div className="flex justify-between items-start mb-4">
@@ -58,7 +68,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
         <div className="card bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title text-2xl mb-4">Solution</h2>
-            
+
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Code</h3>
               <div className="mockup-code">
@@ -75,7 +85,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
 
             <div className="text-sm text-base-content/60">
               <p>
-                Submitted on {new Date(solutionData.solution.timestamp).toLocaleDateString()} 
+                Submitted on {new Date(solutionData.solution.timestamp).toLocaleDateString()}
                 at {new Date(solutionData.solution.timestamp).toLocaleTimeString()}
               </p>
             </div>

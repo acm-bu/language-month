@@ -1,10 +1,11 @@
-"use sever"
+"use server"
 
 import { getSessionFromCookie } from "@/server/cookie";
 import { getDbFromEnv } from "@/server/db";
-import { ActionResponse, clientErr, ok } from ".";
+import { ActionResponse, clientErr } from ".";
 import { getAllUserSolutions, insertSolution, isProgressed, updateSolution } from "@/server/db/solutions";
 import type { SolutionContext } from "@/server/db/solutions";
+import { redirect } from "next/navigation";
 
 
 export async function postSolution({ explanation, code, language, puzzleId }: SolutionContext): ActionResponse<string> {
@@ -27,7 +28,7 @@ export async function postSolution({ explanation, code, language, puzzleId }: So
   }
   const result = await insertSolution(db, auth.user.id, { explanation, code, language, puzzleId });
 
-  return ok(result.id);
+  redirect(`/languages/${language}/${puzzleId}/solutions/${result.id}`);
 }
 
 export async function patchSolution({ explanation, code, language, puzzleId }: SolutionContext) {
@@ -47,6 +48,6 @@ export async function patchSolution({ explanation, code, language, puzzleId }: S
 
   const result = await updateSolution(db, auth.user.id, { explanation, code, language, puzzleId });
 
-  return ok(result.id);
+  redirect(`/languages/${language}/${puzzleId}/solutions/${result.id}`);
 }
 

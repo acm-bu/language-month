@@ -1,116 +1,48 @@
-"use client";
-
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import SolutionPost from "@/components/SolutionPost";
+import { getDbFromEnv } from "@/server/db";
+import { getSolutionsForProblem, hasSolved } from "@/server/db/solutions";
+import { findCourseAndPuzzle } from "@/server/languages";
+import { notFound } from "next/navigation";
+import { forceAuthenticated } from "@/server/db/auth";
+import LockedScreen from "@/components/LockedScreen";
 
-const solutionsData = {
-  "day-1": [
-    {
-      id: "1",
-      author: "Alice_Dev",
-      language: "Python",
-      code: `print("Hello, World!")`,
-      explanation: "Simple and straightforward approach using Python's built-in print function.",
-      timestamp: "3 hours ago",
-      votes: 12,
-      comments: [
-        {
-          id: "1-1",
-          author: "Bob_Coder",
-          content: "Clean and simple! This is exactly what I was looking for.",
-          timestamp: "2 hours ago"
-        }
-      ]
-    },
-    {
-      id: "2",
-      author: "Charlie_Student",
-      language: "JavaScript",
-      code: `console.log("Hello, World!");`,
-      explanation: "Using console.log to output the required string in JavaScript.",
-      timestamp: "5 hours ago",
-      votes: 8,
-      comments: []
-    }
-  ],
-  "day-2": [
-    {
-      id: "3",
-      author: "Dave_Master",
-      language: "Python",
-      code: `a = int(input())
-b = int(input())
-print(a + b)`,
-      explanation: "Read two integers from input and print their sum. Using int() to convert string input to integers.",
-      timestamp: "1 day ago",
-      votes: 15,
-      comments: [
-        {
-          id: "3-1",
-          author: "Eve_Learner",
-          content: "Thanks for the explanation! I was confused about the int() conversion.",
-          timestamp: "1 day ago"
-        }
-      ]
-    }
-  ],
-  "day-5": [
-    {
-      id: "4",
-      author: "Frank_Expert",
-      language: "Python",
-      code: `def fibonacci(n):
-    if n <= 0:
-        return []
-    elif n == 1:
-        return [0]
-    elif n == 2:
-        return [0, 1]
-    
-    fib = [0, 1]
-    for i in range(2, n):
-        fib.append(fib[i-1] + fib[i-2])
-    
-    return fib
 
-n = int(input())
-result = fibonacci(n)
-print(", ".join(map(str, result)))`,
-      explanation: "Iterative approach to generate Fibonacci sequence. More efficient than recursive solution for larger values of n.",
-      timestamp: "2 days ago",
-      votes: 23,
-      comments: [
-        {
-          id: "4-1",
-          author: "Grace_Student",
-          content: "Why is iterative better than recursive here?",
-          timestamp: "2 days ago"
-        },
-        {
-          id: "4-2",
-          author: "Frank_Expert",
-          content: "Recursive approach has exponential time complexity due to redundant calculations, while iterative is O(n).",
-          timestamp: "2 days ago"
-        }
-      ]
-    }
-  ]
-};
-
-const puzzleTitles = {
-  "day-1": "Hello World",
-  "day-2": "Sum of Two Numbers",
-  "day-5": "Fibonacci Sequence"
-};
-
-export default function SolutionsPage() {
-  const params = useParams();
-  const language = params.language as string;
-  const puzzleId = params.puzzleId as string;
+export default async function SolutionsPage({ params }: { params: Promise<{ language: string; puzzleId: string }> }) {
+  const { language, puzzleId } = await params;
   
-  const solutions = solutionsData[puzzleId as keyof typeof solutionsData] || [];
-  const puzzleTitle = puzzleTitles[puzzleId as keyof typeof puzzleTitles] || "Unknown Puzzle";
+  const db = getDbFromEnv();
+  const solutionsData = await getSolutionsForProblem(db, language, puzzleId);
+  const auth = await forceAuthenticated(db);
+
+  const solved = await hasSolved(db, auth.user.id, language, puzzleId);
+
+  if (!solved) {
+    return (
+      <LockedScreen
+        backToCalendarHref={`/languages/${language}`}
+      />
+    )
+  }
+  
+  const solutions = solutionsData.map(({ solution, user }) => ({
+    id: solution.id,
+    author: `${user.firstName} ${user.lastName}`,
+    language: solution.language,
+    code: solution.code,
+    explanation: solution.explanation,
+    timestamp: solution.timestamp.toISOString(),
+    puzzleId: solution.puzzleId,
+    votes: 0,
+    comments: []
+  }));
+  const u = findCourseAndPuzzle(language, puzzleId);
+
+  if (!u) {
+    notFound();
+  }
+  const { puzzle } = u;
+  
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -121,7 +53,7 @@ export default function SolutionsPage() {
         
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Solutions - {puzzleTitle}</h1>
+            <h1 className="text-4xl font-bold mb-2">Solutions - {puzzle.title}</h1>
             <p className="text-base-content/70">{solutions.length} solution{solutions.length !== 1 ? "s" : ""} submitted</p>
           </div>
           
