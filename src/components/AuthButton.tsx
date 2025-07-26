@@ -1,10 +1,26 @@
 "use client";
 
+import { whoami } from "@/actions/whoami";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AuthButton() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const v = async () => {
+      const u = whoami();
+
+      if (u !== null) {
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+
+    }
+
+    v();
+  }, [])
 
   if (isLoggedIn) {
     return (

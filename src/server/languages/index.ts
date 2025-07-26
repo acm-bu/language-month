@@ -3,6 +3,7 @@ import { languageCourses } from "./data";
 export interface LanguageCourse {
   language: string;
   dateOpen: Date;
+  title: string;
   description: string;
   puzzles: Puzzle[];
 }
@@ -37,4 +38,16 @@ export function findCourseAndPuzzle(language: string, id: string): { puzzle: Puz
   }
 
   return { course, puzzle };
+}
+
+
+export const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] 
+export const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+export function getStringMonth(date: Date): string {
+  return months[date.getUTCMonth()];
+}
+
+export function getStringWeekday(date: Date): string {
+  return dayNames[date.getUTCDay()];
 }

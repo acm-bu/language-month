@@ -10,6 +10,7 @@ import { LanguageCourse } from ".";
 
 
 const typescript: LanguageCourse = {
+  title: "Typescript",
   language: "typescript",
   dateOpen: new Date("2025-09-01"),
   description: "Learn typescript for web appications",

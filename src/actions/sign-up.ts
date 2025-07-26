@@ -4,17 +4,18 @@ import { setSessionCookie } from "@/server/cookie";
 import { getDbFromEnv } from "@/server/db";
 import { createUser, signIn } from "@/server/db/auth";
 import { redirect } from "next/navigation";
+import { ActionResponse, clientErr } from ".";
 
 
-export async function signUp(email: string, firstName: string, lastName: string, password: string) {
+export async function signUp(email: string, firstName: string, lastName: string, password: string): ActionResponse<undefined> {
   const emailValid = validateEmail(email);
   const passwordValid = validatePassword(password);
   if (typeof emailValid === "string") {
-    return new Error(`Error signing up: ${emailValid}`);
+    return clientErr(`Error signing up: ${emailValid}`);
   }
 
   if (typeof passwordValid === "string") {
-    return new Error(`Error signing up: ${passwordValid}`);
+    return clientErr(`Error signing up: ${passwordValid}`);
   }
 
   const db = getDbFromEnv();

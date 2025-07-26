@@ -12,7 +12,7 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
 
   const found = findCourseAndPuzzle(language, puzzleId);
   if (!found) {
-    throw notFound();
+    notFound();
   }
   const { puzzle } = found;
 

@@ -1,74 +1,29 @@
+import { getDbFromEnv } from "@/server/db";
+import { forceAuthenticated } from "@/server/db/auth";
+import { getAllUserSolutions } from "@/server/db/solutions";
+// Claude: please use these getStringDay and getStringWeekday functions that take in a date
+// argument and return what you'd expect
+import { findCourse, getStringMonth, getStringWeekday } from "@/server/languages";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 interface LanguagePageProps {
   params: Promise<{ language: string }>;
 }
 
-const generateCalendarData = (language: string) => {
-  const weeks = [];
-  const daysInMonth = 31;
-  const startDayOfWeek = 1; // Monday
-  
-  // Puzzle days: Monday, Tuesday, Thursday, Friday (1, 2, 4, 5)
-  const puzzleDays = [1, 2, 4, 5];
-  
-  let currentDay = 1;
-  
-  for (let week = 0; week < 5; week++) {
-    const weekDays = [];
-    
-    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-      if (week === 0 && dayOfWeek < startDayOfWeek) {
-        weekDays.push(null);
-      } else if (currentDay > daysInMonth) {
-        weekDays.push(null);
-      } else {
-        const hasPuzzle = puzzleDays.includes(dayOfWeek);
-        weekDays.push({
-          day: currentDay,
-          hasPuzzle,
-          puzzleId: hasPuzzle ? `day-${currentDay}` : null,
-          isCompleted: Math.random() > 0.5, // Random completion status for demo
-        });
-        currentDay++;
-      }
-    }
-    
-    weeks.push(weekDays);
-    
-    if (currentDay > daysInMonth) break;
-  }
-  
-  return weeks;
-};
-
-const languageInfo = {
-  python: { name: "Python", month: "January 2024", description: "Learn the basics of Python programming" },
-  javascript: { name: "JavaScript", month: "February 2024", description: "Master modern JavaScript and ES6+" },
-  rust: { name: "Rust", month: "March 2024", description: "Explore systems programming with Rust" },
-  go: { name: "Go", month: "April 2024", description: "Build scalable applications with Go" },
-  typescript: { name: "TypeScript", month: "July 2024", description: "Learn type-safe JavaScript development" },
-  kotlin: { name: "Kotlin", month: "May 2024", description: "Modern Android development with Kotlin" },
-  swift: { name: "Swift", month: "June 2024", description: "iOS development with Swift" },
-};
 
 export default async function LanguagePage({ params }: LanguagePageProps) {
+  const db = getDbFromEnv();
+  const { user } = await forceAuthenticated(db);
   const { language } = await params;
-  const info = languageInfo[language as keyof typeof languageInfo];
+
+  const course = findCourse(language)
+  const solutions = getAllUserSolutions(db, user.id, language);
   
-  if (!info) {
-    return (
-      <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="text-4xl font-bold mb-4">Language Not Found</h1>
-        <p className="mb-4">The language "{language}" is not available.</p>
-        <Link href="/languages" className="btn btn-primary">
-          Back to Languages
-        </Link>
-      </div>
-    );
+  if (!course) {
+    notFound();
   }
 
-  const calendarData = generateCalendarData(language);
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
@@ -77,9 +32,9 @@ export default async function LanguagePage({ params }: LanguagePageProps) {
         <Link href="/languages" className="btn btn-ghost btn-sm mb-4">
           ← Back to Languages
         </Link>
-        <h1 className="text-4xl font-bold mb-2">{info.name}</h1>
-        <p className="text-lg opacity-70 mb-2">{info.month}</p>
-        <p className="text-base-content/80">{info.description}</p>
+        <h1 className="text-4xl font-bold mb-2">{course.title}</h1>
+        <p className="text-lg opacity-70 mb-2">{getStringMonth(course.dateOpen)} - {course.dateOpen.getUTCFullYear()}</p>
+        <p className="text-base-content/80">{course.description}</p>
       </div>
 
       <div className="card bg-base-200 shadow-xl">
@@ -95,6 +50,7 @@ export default async function LanguagePage({ params }: LanguagePageProps) {
           </div>
 
           <div className="grid grid-cols-7 gap-2">
+            {/* OLD OUTDATED CODE -- SIMILAR STYLE BUT UPDATE WITH NEW STUFF */}
             {calendarData.map((week, weekIndex) => 
               week.map((day, dayIndex) => (
                 <div key={`${weekIndex}-${dayIndex}`} className="aspect-square">
@@ -121,6 +77,7 @@ export default async function LanguagePage({ params }: LanguagePageProps) {
                 </div>
               ))
             )}
+            {/* END OLD CODE */}
           </div>
 
           <div className="mt-6 flex justify-center gap-4 text-sm">

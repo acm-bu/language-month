@@ -111,7 +111,7 @@ export async function forceAuthenticated(db: Database, redirectTo?: string): Pro
   const join = await getSessionFromCookie(db);
 
   if (!join) {
-    throw redirect(redirectTo ?? "/auth");
+    redirect(redirectTo ?? "/auth");
   }
 
   return join;
