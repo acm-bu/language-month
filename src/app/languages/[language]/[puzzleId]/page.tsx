@@ -4,11 +4,12 @@ import PuzzleDescription from "@/components/PuzzleDescription";
 import { findCourseAndPuzzle } from "@/server/languages";
 import SubmitButton from "@/components/SubmitButton";
 import NewPostForm from "@/components/NewPostForm";
-import { getSessionFromCookie } from "@/server/cookie";
 import { getDbFromEnv } from "@/server/db";
-import { getUserSolution } from "@/server/db/solutions";
+import { getUserSolution, hasSolved, isProgressed } from "@/server/db/solutions";
+import { forceAuthenticated } from "@/server/db/auth";
+import LockedScreen from "@/components/LockedScreen";
 
-export default async function PuzzlePage({ params }: { params: Promise<{ language: string, puzzleId: string}> }) {
+export default async function PuzzlePage({ params }: { params: Promise<{ language: string, puzzleId: string }> }) {
   const p = await params;
   const language = p.language;
   const puzzleId = p.puzzleId;
@@ -19,10 +20,27 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
   }
   const { puzzle } = found;
 
-  // Check if user has an existing solution
   const db = getDbFromEnv();
-  const auth = await getSessionFromCookie(db);
-  const existingSolution = auth ? await getUserSolution(db, auth.user.id, language, puzzleId) : null;
+  const auth = await forceAuthenticated(db);
+
+  // this is a bit more difficult to read, but it allows us to run these queries quicker
+  const [
+    existingSolution,
+    solved,
+    progressed,
+  ] = await Promise.all([
+    getUserSolution(db, auth.user.id, language, puzzleId),
+    hasSolved(db, auth.user.id, language, puzzleId),
+    isProgressed(db, auth.user.id, language, puzzleId)
+  ]);
+
+  if (!progressed) {
+    return (
+      <LockedScreen
+        backToCalendarHref={`/languages/${language}`}
+      />
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -36,13 +54,15 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
             <h1 className="text-4xl font-bold mb-2">{puzzle.title}</h1>
           </div>
           <div className="flex gap-2">
-            <Link
-              href={`/languages/${language}/${puzzleId}/solutions`}
-              className="btn btn-outline"
-            >
-              View Solutions
-            </Link>
-            <SubmitButton title={puzzle.title} language={language} puzzleId={puzzleId} existingSolution={existingSolution}/>
+            {solved ?
+              (<Link
+                href={`/languages/${language}/${puzzleId}/solutions`}
+                className="btn btn-outline"
+              >
+                View Solutions
+              </Link>) : <></>
+            }
+            <SubmitButton title={puzzle.title} language={language} puzzleId={puzzleId} existingSolution={existingSolution} />
           </div>
         </div>
       </div>
