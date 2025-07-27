@@ -8,13 +8,15 @@ export const usersTable = sqliteTable("users", {
   firstName: text().notNull(),
   lastName: text().notNull(),
   hashedPassword: text().notNull(),
+  // we can deal with verifying emails later
   verified: int({ mode: "boolean" }).notNull().default(true),
   bio: text(),
 });
 
 export type User = InferSelectModel<typeof usersTable>;
 export type PublicUser = Omit<User, "hashedPassword" | "email" | "verified">;
-
+export type PrivateUser = Omit<User, "hashedPassword">;
+export type EditableProfile = Pick<User, "firstName" | "lastName" | "bio">;
 
 export const sessionsTable = sqliteTable("sessions", {
   token: text().notNull().primaryKey().unique(),
