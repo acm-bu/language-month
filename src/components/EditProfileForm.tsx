@@ -77,7 +77,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
           </label>
           <textarea
             name="bio"
-            value={formData.bio}
+            value={formData.bio ?? ""}
             onChange={handleInputChange}
             className="textarea textarea-bordered w-full"
             rows={4}

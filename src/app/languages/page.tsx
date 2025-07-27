@@ -2,19 +2,20 @@ import Link from "next/link";
 import { findAllCourses, getStringMonth } from "@/server/languages";
 import { getAllLanguagesProgress } from "@/server/db/solutions";
 import { getDbFromEnv } from "@/server/db";
-import { whoami } from "@/actions/whoami";
 import LanguageProgressBar from "@/components/LanguageProgressBar";
+import { forceAuthenticated } from "@/server/db/auth";
+import { getSessionFromCookie } from "@/server/cookie";
 
 export default async function LanguagesPage() {
   const courses = findAllCourses();
-  const user = await whoami();
-  
+  const db = getDbFromEnv();
+  const auth = await getSessionFromCookie(db);
+
   let progressData: Record<string, { completed: number, total: number }> = {};
-  if (user) {
-    const db = getDbFromEnv();
-    progressData = await getAllLanguagesProgress(db, user.id);
+  if (auth) {
+    progressData = await getAllLanguagesProgress(db, auth.user.id);
   }
-  
+
   const currentDate = new Date();
   const currentCourse = courses.find(course => course.dateOpen <= currentDate);
   const futureCourses = courses.filter(course => course.dateOpen > currentDate);
@@ -34,11 +35,11 @@ export default async function LanguagesPage() {
                   <h3 className="card-title text-2xl">{currentCourse.title}</h3>
                   <p className="text-primary-content/80 mb-2">{getStringMonth(currentCourse.dateOpen)} {currentCourse.dateOpen.getFullYear()}</p>
                   <p className="mb-4">{currentCourse.description}</p>
-                  {user && progressData[currentCourse.language] && (
+                  {auth && progressData[currentCourse.language] && (
                     <div className="mb-4">
-                      <LanguageProgressBar 
-                        completed={progressData[currentCourse.language].completed} 
-                        total={progressData[currentCourse.language].total} 
+                      <LanguageProgressBar
+                        completed={progressData[currentCourse.language].completed}
+                        total={progressData[currentCourse.language].total}
                       />
                     </div>
                   )}
@@ -68,11 +69,11 @@ export default async function LanguagesPage() {
                   </div>
                   <p className="text-sm opacity-70 mb-2">{getStringMonth(course.dateOpen)} {course.dateOpen.getFullYear()}</p>
                   <p className="mb-4">{course.description}</p>
-                  {user && progressData[course.language] && (
+                  {auth && progressData[course.language] && (
                     <div className="mb-4">
-                      <LanguageProgressBar 
-                        completed={progressData[course.language].completed} 
-                        total={progressData[course.language].total} 
+                      <LanguageProgressBar
+                        completed={progressData[course.language].completed}
+                        total={progressData[course.language].total}
                       />
                     </div>
                   )}
