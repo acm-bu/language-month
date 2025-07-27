@@ -48,13 +48,15 @@ export type ShortenedSolution = Pick<Solution, "language" | "puzzleId" | "timest
 
 export const commentsTable = sqliteTable("comments", {
   id: text().notNull().unique().primaryKey(),
-  replyTo: text(),
+  replyTo: text().notNull(),
+  replyType: text().$type<"solution" | "comment" | "puzzle">().default("comment"),
   content: text({ length: 100000 }).notNull(),
   author: text().notNull().references(() => usersTable.id),
   timestamp: int({ mode: "timestamp" }).notNull().default(new Date()),
   score: int().default(0).notNull(),
   language: text().notNull(),
-  puzzleId: text().notNull(),
+  depth: int().notNull().default(0),
+  path: text(),
 });
 
 export type Comment = InferSelectModel<typeof commentsTable>;
