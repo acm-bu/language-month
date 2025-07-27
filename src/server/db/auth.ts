@@ -2,13 +2,14 @@ import { eq } from "drizzle-orm";
 import { Database } from ".";
 import type { PublicUser, Session, User } from "./schema";
 import { sessionsTable, usersTable } from "./schema"
-import { randomUUIDv7 } from "bun";
+import { v7 as uuidv7 } from "uuid";
+import bcrypt from "bcryptjs";
 import { getSessionFromCookie } from "../cookie";
 import { redirect } from "next/navigation";
 
 export async function createUser(db: Database, email: string, firstName: string, lastName: string, password: string): Promise<User> {
-  const hashedPassword = Bun.password.hashSync(password);
-  const id = randomUUIDv7();
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  const id = uuidv7();
 
   const user = await db
     .insert(usersTable)
@@ -37,13 +38,13 @@ export async function signIn(db: Database, email: string, password: string): Pro
     return null;
   }
 
-  const verified = Bun.password.verifySync(password, user.hashedPassword);
+  const verified = bcrypt.compareSync(password, user.hashedPassword);
 
   if (!verified) {
     return null;
   }
 
-  const sessionId = randomUUIDv7();
+  const sessionId = uuidv7();
   const expirationDate = new Date();
   expirationDate.setUTCMilliseconds(Date.now() + 1000 * 60 * 60 * 24 * 30);
 

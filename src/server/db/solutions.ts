@@ -3,7 +3,7 @@ import { Database } from ".";
 import { ShortenedSolution, Solution, solutionsTable, usersTable } from "./schema";
 import { findAllCourses, findCourse } from "../languages";
 import { notFound } from "next/navigation";
-import { randomUUIDv7 } from "bun";
+import { v7 as uuidv7 } from "uuid";
 
 export interface SolutionContext {
   explanation: string;
@@ -161,7 +161,7 @@ export async function getAllLanguagesProgress(db: Database, userId: string): Pro
 }
 
 export async function insertSolution(db: Database, userId: string, ctx: SolutionContext): Promise<Solution> {
-  const id = randomUUIDv7();
+  const id = uuidv7();
   const result = await db
     .insert(solutionsTable)
     .values({
