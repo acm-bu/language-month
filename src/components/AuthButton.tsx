@@ -1,28 +1,13 @@
 "use client";
 
-import { logout } from "@/actions/logout";
-import { whoami } from "@/actions/whoami";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 
 export default function AuthButton() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { status } = useSession();
 
-  useEffect(() => {
-    const v = async () => {
-      const u = await whoami();
-
-      if (u.result === "ERR") {
-        setIsLoggedIn(false);
-      } else {
-        setIsLoggedIn(true);
-      }
-    }
-
-    v();
-  }, [])
-
-  if (isLoggedIn) {
+  if (status === "authenticated") {
     return (
       <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
@@ -33,9 +18,8 @@ export default function AuthButton() {
         <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
           <li><a>Profile</a></li>
           <li><button onClick={async () => { 
-            logout() 
-            setIsLoggedIn(false);
-          }}>Logout</button></li>
+            await signOut() 
+          }}>Sign Out</button></li>
         </ul>
       </div>
     );
