@@ -32,3 +32,8 @@ export async function getSessionFromCookie(db: Database) {
 
   return join;
 }
+
+export async function removeSessionCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete("session");
+}

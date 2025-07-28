@@ -1,5 +1,6 @@
 "use client";
 
+import { logout } from "@/actions/logout";
 import { whoami } from "@/actions/whoami";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -16,7 +17,6 @@ export default function AuthButton() {
       } else {
         setIsLoggedIn(true);
       }
-
     }
 
     v();
@@ -32,7 +32,10 @@ export default function AuthButton() {
         </div>
         <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
           <li><a>Profile</a></li>
-          <li><button onClick={() => setIsLoggedIn(false)}>Logout</button></li>
+          <li><button onClick={async () => { 
+            logout() 
+            setIsLoggedIn(false);
+          }}>Logout</button></li>
         </ul>
       </div>
     );
