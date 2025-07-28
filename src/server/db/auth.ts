@@ -1,71 +1,18 @@
 import { eq } from "drizzle-orm";
 import { Database } from ".";
-import type { PublicUser, Session, User } from "./schema";
+import type { PublicUser, User } from "./schema";
+import type { Session } from "next-auth";
 import { sessionsTable, usersTable } from "./schema"
-import { v7 as uuidv7 } from "uuid";
-import bcrypt from "bcryptjs";
-import { getSessionFromCookie } from "../cookie";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { nextAuthConfig } from "../nextauth";
 
-export async function createUser(db: Database, email: string, firstName: string, lastName: string, password: string): Promise<User> {
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const id = uuidv7();
 
-  const user = await db
-    .insert(usersTable)
-    .values({
-      id,
-      email,
-      firstName,
-      lastName,
-      hashedPassword,
-    })
-    .returning();
-
-  return user[0]!;
-}
-
-// we return null if something goes wrong so that we don't
-// give the user a hint on if it was their email or password
-// that was wrong
-//
-// this is to prevent attackers from just guessing emails
-// to learn which ones are real and which ones are not
-export async function signIn(db: Database, email: string, password: string): Promise<null | Session> {
-  const user = await findUserByEmail(db, email);
-
-  if (!user) {
-    return null;
-  }
-
-  const verified = bcrypt.compareSync(password, user.hashedPassword);
-
-  if (!verified) {
-    return null;
-  }
-
-  const sessionId = uuidv7();
-  const expirationDate = new Date();
-  expirationDate.setUTCMilliseconds(Date.now() + 1000 * 60 * 60 * 24 * 30);
-
-  const session: Session = {
-    token: sessionId,
-    // expires after 30 days
-    expiresAt: expirationDate,
-    userId: user.id,
-  }
-
-  await db
-    .insert(sessionsTable)
-    .values(session)
-
-  return session;
-}
 
 export async function deleteSession(db: Database, sessionId: string) {
   await db
     .delete(sessionsTable)
-    .where(eq(sessionsTable.token, sessionId))
+    .where(eq(sessionsTable.sessionToken, sessionId))
 }
 
 
@@ -79,41 +26,41 @@ export async function findUserByEmail(db: Database, email: string): Promise<User
   return users[0] ?? null;
 }
 
-export async function findUserBySession(db: Database, sessionId: string): Promise<{ user: User, session: Session } | null> {
-  const join = await db
-    .select()
-    .from(sessionsTable)
-    .where(eq(sessionsTable.token, sessionId))
-    .innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
-    .limit(1)
-
-  if (join.length === 0) {
-    return null;
-  }
-
-  return {
-    session: join[0].sessions,
-    user: join[0].users,
-  }
-}
-
 export function userToPublic(user: User): PublicUser {
   return {
     id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    bio: user.bio,
-
+    name: user.name,
+    image: user.image, 
   }
 }
 
 
 export async function forceAuthenticated(db: Database, redirectTo?: string): Promise<{ user: User, session: Session }> {
-  const join = await getSessionFromCookie(db);
+  const join = await getUserAndSession(db);
 
-  if (!join) {
+  if (!join || !join.user) {
     redirect(redirectTo ?? "/auth");
   }
 
+
   return join;
+}
+
+export async function getUserAndSession(db: Database): Promise<{ session: Session, user: User } | null> {
+  const session = await getServerSession(nextAuthConfig);
+
+  if (!session) {
+    return null;
+  }
+
+  const users = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, session.user.id))
+  
+  if (users.length !== 1) {
+    return null;
+  }
+
+  return { user: users[0], session };
 }
