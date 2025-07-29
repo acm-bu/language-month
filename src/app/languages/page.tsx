@@ -3,13 +3,12 @@ import { findAllCourses, getStringMonth } from "@/server/languages";
 import { getAllLanguagesProgress } from "@/server/db/solutions";
 import { getDbFromEnv } from "@/server/db";
 import LanguageProgressBar from "@/components/LanguageProgressBar";
-import { forceAuthenticated } from "@/server/db/auth";
-import { getSessionFromCookie } from "@/server/cookie";
+import { getUserAndSession } from "@/server/db/auth";
 
 export default async function LanguagesPage() {
   const courses = findAllCourses();
   const db = getDbFromEnv();
-  const auth = await getSessionFromCookie(db);
+  const auth = await getUserAndSession(db);
 
   let progressData: Record<string, { completed: number, total: number }> = {};
   if (auth) {

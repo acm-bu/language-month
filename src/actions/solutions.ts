@@ -1,6 +1,6 @@
 "use server"
 
-import { getSessionFromCookie } from "@/server/cookie";
+import { getUserAndSession } from "@/server/db/auth";
 import { getDbFromEnv } from "@/server/db";
 import { ActionResponse, clientErr } from ".";
 import { getAllUserSolutions, insertSolution, isProgressed, updateSolution } from "@/server/db/solutions";
@@ -10,7 +10,7 @@ import { redirect } from "next/navigation";
 
 export async function postSolution({ explanation, code, language, puzzleId }: SolutionContext): ActionResponse<string> {
   const db = getDbFromEnv();
-  const auth = await getSessionFromCookie(db);
+  const auth = await getUserAndSession(db);
 
   if (!auth) {
     return clientErr("Not logged in");
@@ -33,7 +33,7 @@ export async function postSolution({ explanation, code, language, puzzleId }: So
 
 export async function patchSolution({ explanation, code, language, puzzleId }: SolutionContext) {
   const db = getDbFromEnv();
-  const auth = await getSessionFromCookie(db);
+  const auth = await getUserAndSession(db);
 
   if (!auth) {
     return clientErr("Not logged in");

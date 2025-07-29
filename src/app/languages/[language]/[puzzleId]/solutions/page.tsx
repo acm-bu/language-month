@@ -27,7 +27,7 @@ export default async function SolutionsPage({ params }: { params: Promise<{ lang
   
   const solutions = solutionsData.map(({ solution, user }) => ({
     id: solution.id,
-    author: `${user.firstName} ${user.lastName}`,
+    author: `${user.name}`,
     language: solution.language,
     code: solution.code,
     explanation: solution.explanation,
