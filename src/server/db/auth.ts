@@ -2,18 +2,10 @@ import { eq } from "drizzle-orm";
 import { Database } from ".";
 import type { PublicUser, User } from "./schema";
 import type { Session } from "next-auth";
-import { sessionsTable, usersTable } from "./schema"
+import { usersTable } from "./schema"
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { nextAuthConfig } from "../nextauth";
-
-
-
-export async function deleteSession(db: Database, sessionId: string) {
-  await db
-    .delete(sessionsTable)
-    .where(eq(sessionsTable.sessionToken, sessionId))
-}
 
 
 export async function findUserByEmail(db: Database, email: string): Promise<User | null> {
@@ -33,7 +25,6 @@ export function userToPublic(user: User): PublicUser {
     image: user.image, 
   }
 }
-
 
 export async function forceAuthenticated(db: Database, redirectTo?: string): Promise<{ user: User, session: Session }> {
   const join = await getUserAndSession(db);

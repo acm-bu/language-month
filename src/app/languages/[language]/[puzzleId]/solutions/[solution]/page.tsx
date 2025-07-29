@@ -50,7 +50,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
           <div>
             <h1 className="text-4xl font-bold mb-2">{puzzle.title}</h1>
             <p className="text-lg text-base-content/70">
-              Solution by {solutionData.user.firstName} {solutionData.user.lastName}
+              Solution by {solutionData.user.name} 
             </p>
           </div>
           <div className="flex gap-2">

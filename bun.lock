@@ -15,12 +15,14 @@
         "daisyui": "^5.0.46",
         "drizzle-kit": "^0.31.4",
         "drizzle-orm": "^0.44.3",
+        "heroicons": "^2.2.0",
         "jsonwebtoken": "^9.0.2",
         "mdx": "^0.3.1",
         "next": "15.4.3",
         "next-auth": "^4.24.11",
         "react": "19.1.0",
         "react-dom": "19.1.0",
+        "react-icons": "^5.5.0",
         "rehype-pretty-code": "^0.14.1",
         "remark-frontmatter": "^5.0.0",
         "remark-mdx-frontmatter": "^5.2.0",
@@ -448,6 +450,8 @@
 
     "hastscript": ["hastscript@9.0.1", "", { "dependencies": { "@types/hast": "^3.0.0", "comma-separated-tokens": "^2.0.0", "hast-util-parse-selector": "^4.0.0", "property-information": "^7.0.0", "space-separated-tokens": "^2.0.0" } }, "sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w=="],
 
+    "heroicons": ["heroicons@2.2.0", "", {}, "sha512-yOwvztmNiBWqR946t+JdgZmyzEmnRMC2nxvHFC90bF1SUttwB6yJKYeme1JeEcBfobdOs827nCyiWBS2z/brog=="],
+
     "hosted-git-info": ["hosted-git-info@2.8.9", "", {}, "sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw=="],
 
     "html-void-elements": ["html-void-elements@3.0.0", "", {}, "sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg=="],
@@ -697,6 +701,8 @@
     "react": ["react@19.1.0", "", {}, "sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg=="],
 
     "react-dom": ["react-dom@19.1.0", "", { "dependencies": { "scheduler": "^0.26.0" }, "peerDependencies": { "react": "^19.1.0" } }, "sha512-Xs1hdnE+DyKgeHJeJznQmYMIBG3TKIHJJT95Q58nHLSrElKlGQqDTR2HQ9fx5CN/Gk6Vh/kupBTDLU11/nDk/g=="],
+
+    "react-icons": ["react-icons@5.5.0", "", { "peerDependencies": { "react": "*" } }, "sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw=="],
 
     "read-input": ["read-input@0.3.1", "", {}, "sha512-J1ZkWCnB4altU7RTe+62PSfa21FrEtfKyO9fuqR3yP8kZku3nIwaw2Krj383JC7egAIl5Zyz2w+EOu9uXH5HZw=="],
 
