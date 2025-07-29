@@ -97,7 +97,12 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
           </div>
         </div>
 
-        <CommentsSection comments={comments} />
+        <CommentsSection 
+          comments={comments}
+          replyTo={solutionId}
+          replyType="solution"
+          language={language}
+        />
       </div>
     </div>
   );

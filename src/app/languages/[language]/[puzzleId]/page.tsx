@@ -88,7 +88,13 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
             </div>
             
             <div className="mt-8">
-              <CommentsSection comments={comments} title="Discussion" />
+              <CommentsSection 
+                comments={comments} 
+                replyTo={puzzleId}
+                replyType="puzzle"
+                language={language}
+                title="Discussion" 
+              />
             </div>
           </div>
         </div>

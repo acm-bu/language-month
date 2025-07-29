@@ -3,16 +3,19 @@
 import { useState } from "react";
 import { ExpandedComment } from "@/server/db/comments";
 import { getCommentReplies } from "@/actions/comments";
+import CommentForm from "./CommentForm";
 
 interface CommentProps {
   comment: ExpandedComment;
+  language: string;
   depth?: number;
 }
 
-export default function Comment({ comment, depth = 0 }: CommentProps) {
+export default function Comment({ comment, language, depth = 0 }: CommentProps) {
   const [replies, setReplies] = useState<ExpandedComment[]>([]);
   const [showReplies, setShowReplies] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
+  const [showReplyForm, setShowReplyForm] = useState(false);
 
   const handleToggleReplies = async () => {
     if (!showReplies && replies.length === 0) {
@@ -27,6 +30,14 @@ export default function Comment({ comment, depth = 0 }: CommentProps) {
       }
     }
     setShowReplies(!showReplies);
+  };
+
+  const handleReplyAdded = (newReply: ExpandedComment) => {
+    setReplies(prev => [...prev, newReply]);
+    setShowReplyForm(false);
+    if (!showReplies) {
+      setShowReplies(true);
+    }
   };
 
   const maxDepth = 5;
@@ -67,10 +78,27 @@ export default function Comment({ comment, depth = 0 }: CommentProps) {
                     "Show replies"
                   )}
                 </button>
-                <button className="text-xs text-base-content/70 hover:text-base-content transition-colors">
+                <button 
+                  onClick={() => setShowReplyForm(!showReplyForm)}
+                  className="text-xs text-base-content/70 hover:text-base-content transition-colors"
+                >
                   Reply
                 </button>
               </div>
+
+              {showReplyForm && (
+                <div className="mt-3">
+                  <CommentForm
+                    replyTo={comment.id}
+                    replyType="comment"
+                    language={language}
+                    onCommentAdded={handleReplyAdded}
+                    onCancel={() => setShowReplyForm(false)}
+                    placeholder="Write a reply..."
+                    compact={true}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -79,7 +107,7 @@ export default function Comment({ comment, depth = 0 }: CommentProps) {
       {showReplies && replies.length > 0 && shouldNest && (
         <div className="mt-2">
           {replies.map((reply) => (
-            <Comment key={reply.id} comment={reply} depth={depth + 1} />
+            <Comment key={reply.id} comment={reply} language={language} depth={depth + 1} />
           ))}
         </div>
       )}
