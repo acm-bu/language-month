@@ -7,7 +7,7 @@ export const usersTable = sqliteTable("user", {
   id: text("id").unique().primaryKey().$defaultFn(() => uuidv7()),
   name: text("name"),
   email: text("email").unique(),
-  emailVerified: int("emailVerified", { mode: "timestamp_ms" }).notNull(),
+  emailVerified: int("emailVerified", { mode: "timestamp_ms" }),
   image: text("image"),
 });
 
