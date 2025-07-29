@@ -6,6 +6,15 @@ import rehypePrettyCode from "rehype-pretty-code";
 
 const nextConfig: NextConfig = {
   pageExtensions: ["tsx", "mdx", "md", "ts"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
+      }
+    ]
+  }
 };
 
 const withMdx = createMdx({
