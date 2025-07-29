@@ -81,12 +81,6 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
           </div>
 
           <div className="lg:col-span-1">
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <NewPostForm />
-              </div>
-            </div>
-            
             <div className="mt-8">
               <CommentsSection 
                 comments={comments} 

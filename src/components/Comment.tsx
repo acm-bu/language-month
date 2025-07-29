@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ExpandedComment } from "@/server/db/comments";
 import { getCommentReplies } from "@/actions/comments";
 import CommentForm from "./CommentForm";
+import Image from "next/image";
 
 interface CommentProps {
   comment: ExpandedComment;
@@ -49,9 +50,11 @@ export default function Comment({ comment, language, depth = 0 }: CommentProps) 
         <div className="card-body p-4">
           <div className="flex items-start gap-3">
             {comment.author.image && (
-              <img
+              <Image
                 src={comment.author.image}
-                alt={comment.author.name}
+                alt={comment.author.name ?? "Unknown user"}
+                width={64}
+                height={64}
                 className="w-8 h-8 rounded-full flex-shrink-0"
               />
             )}
