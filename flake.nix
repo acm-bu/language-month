@@ -12,6 +12,7 @@
         nodejs_20
         flyctl
         typescript
+        openssl
       ];
     };
   };

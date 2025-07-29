@@ -14,13 +14,13 @@ export interface AppConfig {
 export function readConfigFromEnv(): AppConfig {
   const clientId = process.env.LANGMONTH_GITHUB_ID;
   const clientSecret = process.env.LANGMONTH_GITHUB_SECRET;
-  
-  if (!clientId) {
-    throw new Error("No LANGMONTH_CLIENT_ID provided");
+
+  if (clientId === undefined) {
+    throw new Error("No LANGMONTH_GITHUB_ID provided");
   }
 
-  if (!clientSecret) {
-    throw new Error("No LANGMONTH_CLIENT_SECRET provided");
+  if (clientSecret === undefined) {
+    throw new Error("No LANGMONTH_GITHUB_SECRET provided");
   }
 
   return {
