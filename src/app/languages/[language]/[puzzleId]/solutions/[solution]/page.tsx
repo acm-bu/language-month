@@ -5,6 +5,8 @@ import { getSolutionById, hasSolved } from "@/server/db/solutions";
 import { getDbFromEnv } from "@/server/db";
 import { forceAuthenticated } from "@/server/db/auth";
 import LockedScreen from "@/components/LockedScreen";
+import { getCommentsForSolution } from "@/server/db/comments";
+import CommentsSection from "@/components/CommentsSection";
 
 interface SolutionPageProps {
   params: Promise<{
@@ -34,7 +36,10 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
   }
   const { puzzle } = found;
 
-  const solutionData = await getSolutionById(db, solutionId);
+  const [solutionData, comments] = await Promise.all([
+    getSolutionById(db, solutionId),
+    getCommentsForSolution(db, solutionId)
+  ]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -92,14 +97,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
           </div>
         </div>
 
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <h2 className="card-title text-2xl mb-4">Comments</h2>
-            <div className="text-center py-8">
-              <p className="text-base-content/60">Comments section coming soon...</p>
-            </div>
-          </div>
-        </div>
+        <CommentsSection comments={comments} />
       </div>
     </div>
   );

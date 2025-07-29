@@ -24,7 +24,6 @@ export async function getSolutionById(db: Database, solutionId: string) {
     notFound();
   }
 
-
   const result = join[0];
 
   return {

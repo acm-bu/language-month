@@ -8,9 +8,6 @@ import { signOut } from "next-auth/react";
 export default function AuthButton() {
   const { status, data  } = useSession();
 
-
-  // use this:
-  // data?.user.image
   if (status === "authenticated") {
     return (
       <div className="dropdown dropdown-end">

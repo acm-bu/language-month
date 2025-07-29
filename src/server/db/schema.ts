@@ -112,8 +112,10 @@ export type ShortenedSolution = Pick<Solution, "language" | "puzzleId" | "timest
 
 export const commentsTable = sqliteTable("comments", {
   id: text().notNull().unique().primaryKey(),
+
   replyTo: text().notNull(),
   replyType: text().$type<"solution" | "comment" | "puzzle">().default("comment"),
+
   content: text({ length: 100000 }).notNull(),
   author: text().notNull().references(() => usersTable.id),
   timestamp: int({ mode: "timestamp" }).notNull().default(new Date()),

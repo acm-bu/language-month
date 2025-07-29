@@ -8,6 +8,8 @@ import { getDbFromEnv } from "@/server/db";
 import { getUserSolution, hasSolved, isProgressed } from "@/server/db/solutions";
 import { forceAuthenticated } from "@/server/db/auth";
 import LockedScreen from "@/components/LockedScreen";
+import { getCommentsForPuzzle } from "@/server/db/comments";
+import CommentsSection from "@/components/CommentsSection";
 
 export default async function PuzzlePage({ params }: { params: Promise<{ language: string, puzzleId: string }> }) {
   const p = await params;
@@ -28,10 +30,12 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
     existingSolution,
     solved,
     progressed,
+    comments,
   ] = await Promise.all([
     getUserSolution(db, auth.user.id, language, puzzleId),
     hasSolved(db, auth.user.id, language, puzzleId),
-    isProgressed(db, auth.user.id, language, puzzleId)
+    isProgressed(db, auth.user.id, language, puzzleId),
+    getCommentsForPuzzle(db, puzzleId)
   ]);
 
   if (!progressed) {
@@ -80,11 +84,11 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
             <div className="card bg-base-100 shadow-xl">
               <div className="card-body">
                 <NewPostForm />
-
-                <div className="space-y-4">
-                  {/* TODO - list forum posts */}
-                </div>
               </div>
+            </div>
+            
+            <div className="mt-8">
+              <CommentsSection comments={comments} title="Discussion" />
             </div>
           </div>
         </div>
