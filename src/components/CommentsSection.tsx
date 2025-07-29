@@ -8,7 +8,7 @@ import CommentForm from "./CommentForm";
 interface CommentsSectionProps {
   comments: ExpandedComment[];
   replyTo: string;
-  replyType: "solution" | "puzzle";
+  replyType: "solution" | "puzzle" | "comment";
   language: string;
   title?: string;
   maxDepth?: number;

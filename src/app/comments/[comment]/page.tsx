@@ -18,7 +18,7 @@ export default async function CommentThreadPage({ params }: CommentThreadPagePro
   const { comment: commentId } = p;
 
   const db = getDbFromEnv();
-  const auth = await forceAuthenticated(db);
+  await forceAuthenticated(db);
 
   // Get the root comment to understand context
   const rootComment = await db.select()
