@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import AuthButton from "./AuthButton";
+import { SessionProvider } from "next-auth/react";
 
 export default function Header() {
   return (
@@ -9,7 +12,7 @@ export default function Header() {
           ACM Language Month
         </Link>
       </div>
-      
+
       <div className="navbar-center">
         <nav className="menu menu-horizontal px-1">
           <li>
@@ -24,9 +27,11 @@ export default function Header() {
           </li>
         </nav>
       </div>
-      
+
       <div className="navbar-end">
-        <AuthButton />
+        <SessionProvider>
+          <AuthButton />
+        </SessionProvider>
       </div>
     </header>
   );

@@ -28,7 +28,7 @@ export async function getSolutionById(db: Database, solutionId: string) {
   const result = join[0];
 
   return {
-    user: result.users,
+    user: result.user,
     solution: result.solutions,
   }
 }
@@ -203,5 +203,5 @@ export async function getSolutionsForProblem(db: Database, language: string, puz
     .innerJoin(usersTable, eq(solutionsTable.userId, usersTable.id))
 
 
-  return result.map(r => { return { user: r.users, solution: r.solutions }});
+  return result.map(r => { return { user: r.user, solution: r.solutions }});
 }
