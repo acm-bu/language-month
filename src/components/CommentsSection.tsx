@@ -11,6 +11,7 @@ interface CommentsSectionProps {
   replyType: "solution" | "puzzle";
   language: string;
   title?: string;
+  maxDepth?: number;
 }
 
 export default function CommentsSection({ 
@@ -18,7 +19,8 @@ export default function CommentsSection({
   replyTo, 
   replyType, 
   language, 
-  title = "Comments" 
+  title = "Comments",
+  maxDepth = 5
 }: CommentsSectionProps) {
   const [comments, setComments] = useState(initialComments);
 
@@ -52,6 +54,7 @@ export default function CommentsSection({
                 key={comment.id} 
                 comment={comment} 
                 language={language}
+                maxDepth={maxDepth}
               />
             ))
           )}

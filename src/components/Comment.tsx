@@ -10,9 +10,10 @@ interface CommentProps {
   comment: ExpandedComment;
   language: string;
   depth?: number;
+  maxDepth?: number;
 }
 
-export default function Comment({ comment, language, depth = 0 }: CommentProps) {
+export default function Comment({ comment, language, depth = 0, maxDepth = 5 }: CommentProps) {
   const [replies, setReplies] = useState<ExpandedComment[]>([]);
   const [showReplies, setShowReplies] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
@@ -41,7 +42,6 @@ export default function Comment({ comment, language, depth = 0 }: CommentProps) 
     }
   };
 
-  const maxDepth = 5;
   const shouldNest = depth < maxDepth;
 
   return (
@@ -110,7 +110,7 @@ export default function Comment({ comment, language, depth = 0 }: CommentProps) 
       {showReplies && replies.length > 0 && shouldNest && (
         <div className="mt-2">
           {replies.map((reply) => (
-            <Comment key={reply.id} comment={reply} language={language} depth={depth + 1} />
+            <Comment key={reply.id} comment={reply} language={language} depth={depth + 1} maxDepth={maxDepth} />
           ))}
         </div>
       )}
@@ -118,7 +118,15 @@ export default function Comment({ comment, language, depth = 0 }: CommentProps) 
       {showReplies && replies.length > 0 && !shouldNest && (
         <div className="mt-2 p-3 bg-base-300 rounded-lg">
           <p className="text-xs text-base-content/60 mb-2">
-            Replies are too deeply nested. View in full thread.
+            Replies are too deeply nested. 
+            <a 
+              href={`/comments/${comment.id}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline ml-1"
+            >
+              View full thread
+            </a>
           </p>
           {replies.map((reply) => (
             <div key={reply.id} className="text-sm p-2 bg-base-100 rounded mb-2 last:mb-0">

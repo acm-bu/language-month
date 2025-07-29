@@ -1,7 +1,7 @@
 "use server";
 import { getDbFromEnv } from "@/server/db";
 import { forceAuthenticated } from "@/server/db/auth";
-import { createComment, getCommentsForComment } from "@/server/db/comments";
+import { createComment, getCommentsForComment, getAllNestedCommentsForComment } from "@/server/db/comments";
 
 export async function postComment(comment: {
   id: string,
@@ -25,4 +25,10 @@ export async function getCommentReplies(commentId: string) {
   const db = getDbFromEnv();
   const replies = await getCommentsForComment(db, commentId);
   return replies;
+}
+
+export async function getFullCommentThread(commentId: string) {
+  const db = getDbFromEnv();
+  const allComments = await getAllNestedCommentsForComment(db, commentId);
+  return allComments;
 }
