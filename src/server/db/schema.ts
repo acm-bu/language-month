@@ -110,39 +110,5 @@ export const solutionsTable = sqliteTable("solutions", {
 export type Solution = InferSelectModel<typeof solutionsTable>;
 export type ShortenedSolution = Pick<Solution, "language" | "puzzleId" | "timestamp" | "id" | "userId">
 
-export const commentsTable = sqliteTable("comments", {
-  id: text().notNull().unique().primaryKey(),
-
-  replyTo: text().notNull(),
-  replyType: text().$type<"solution" | "comment" | "puzzle">().default("comment"),
-
-  content: text({ length: 100000 }).notNull(),
-  author: text().notNull().references(() => usersTable.id),
-  timestamp: int({ mode: "timestamp" }).notNull().default(new Date()),
-  score: int().default(0).notNull(),
-  language: text().notNull(),
-  depth: int().notNull().default(0),
-  path: text(),
-});
-
-export type Comment = InferSelectModel<typeof commentsTable>;
-
-export const solutionVotes = sqliteTable("solution_votes", {
-  userId: text().notNull().references(() => usersTable.id),
-  solutionId: text().notNull().references(() => solutionsTable.id),
-  positive: int({ mode: "boolean" }).notNull().default(false),
-});
-
-export type SolutionVote = InferSelectModel<typeof solutionVotes>;
-
-
-export const commentVotes = sqliteTable("comment_votes", {
-  userId: text().notNull().references(() => usersTable.id),
-  commentId: text().notNull().references(() => commentsTable.id),
-  positive: int({ mode: "boolean" }).notNull().default(false),
-});
-
-export type CommentVote = InferSelectModel<typeof commentVotes>;
-
 
 

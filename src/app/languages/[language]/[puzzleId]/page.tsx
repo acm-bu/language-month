@@ -3,13 +3,11 @@ import { notFound } from "next/navigation";
 import PuzzleDescription from "@/components/PuzzleDescription";
 import { findCourseAndPuzzle } from "@/server/languages";
 import SubmitButton from "@/components/SubmitButton";
-import NewPostForm from "@/components/NewPostForm";
 import { getDbFromEnv } from "@/server/db";
 import { getUserSolution, hasSolved, isProgressed } from "@/server/db/solutions";
 import { forceAuthenticated } from "@/server/db/auth";
 import LockedScreen from "@/components/LockedScreen";
-import { getCommentsForPuzzle } from "@/server/db/comments";
-import CommentsSection from "@/components/CommentsSection";
+import { CommentsSection } from "@/components/CommentsSection";
 
 export default async function PuzzlePage({ params }: { params: Promise<{ language: string, puzzleId: string }> }) {
   const p = await params;
@@ -30,12 +28,10 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
     existingSolution,
     solved,
     progressed,
-    comments,
   ] = await Promise.all([
     getUserSolution(db, auth.user.id, language, puzzleId),
     hasSolved(db, auth.user.id, language, puzzleId),
     isProgressed(db, auth.user.id, language, puzzleId),
-    getCommentsForPuzzle(db, puzzleId)
   ]);
 
   if (!progressed) {
@@ -82,13 +78,7 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
 
           <div className="lg:col-span-1">
             <div className="mt-8">
-              <CommentsSection 
-                comments={comments} 
-                replyTo={puzzleId}
-                replyType="puzzle"
-                language={language}
-                title="Discussion" 
-              />
+              <CommentsSection />
             </div>
           </div>
         </div>
