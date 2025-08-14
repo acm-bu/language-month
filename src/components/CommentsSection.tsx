@@ -1,20 +1,22 @@
+"use client";
+import Giscus from "@giscus/react";
 
 export function CommentsSection() {
+  console.log("Rendering comments section");
   return (
-    <script src="https://giscus.app/client.js"
-      data-repo="acm-bu/language-month"
-      data-repo-id="R_kgDOPRC5qg"
-      data-category="Announcements"
-      data-category-id="DIC_kwDOPRC5qs4CuMMy"
-      data-mapping="pathname"
-      data-strict="0"
-      data-reactions-enabled="1"
-      data-emit-metadata="0"
-      data-input-position="top"
-      data-theme="preferred_color_scheme"
-      data-lang="en"
-      crossOrigin="anonymous"
-      async>
-    </script>
+    <Giscus
+      repo="acm-bu/language-month"
+      repoId="R_kgDOPRC5qg"
+      category="Announcements"
+      categoryId="DIC_kwDOPRC5qs4CuMMy"
+      mapping="pathname"
+      strict="0"
+      reactions-enabled="1"
+      emitMetadata="0"
+      inputPosition="top"
+      theme="preferred_color_scheme"
+      lang="en"
+    />
+
   )
 }

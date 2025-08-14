@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.10.0",
+    "@giscus/react": "^3.1.0",
     "@libsql/client": "^0.15.10",
     "@mdx-js/loader": "^3.1.0",
     "@next/mdx": "^15.4.3",

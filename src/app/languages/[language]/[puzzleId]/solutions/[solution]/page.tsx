@@ -5,8 +5,7 @@ import { getSolutionById, hasSolved } from "@/server/db/solutions";
 import { getDbFromEnv } from "@/server/db";
 import { forceAuthenticated } from "@/server/db/auth";
 import LockedScreen from "@/components/LockedScreen";
-import { getCommentsForSolution } from "@/server/db/comments";
-import CommentsSection from "@/components/CommentsSection";
+import { CommentsSection } from "@/components/CommentsSection";
 
 interface SolutionPageProps {
   params: Promise<{
@@ -36,10 +35,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
   }
   const { puzzle } = found;
 
-  const [solutionData, comments] = await Promise.all([
-    getSolutionById(db, solutionId),
-    getCommentsForSolution(db, solutionId)
-  ]);
+  const solutionData = await getSolutionById(db, solutionId);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -48,14 +44,14 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
           href={`/languages/${language}/${puzzleId}/solutions`}
           className="btn btn-ghost btn-sm mb-4"
         >
-           Back to Solutions
+          Back to Solutions
         </Link>
 
         <div className="flex justify-between items-start mb-4">
           <div>
             <h1 className="text-4xl font-bold mb-2">{puzzle.title}</h1>
             <p className="text-lg text-base-content/70">
-              Solution by {solutionData.user.name} 
+              Solution by {solutionData.user.name}
             </p>
           </div>
           <div className="flex gap-2">
@@ -97,12 +93,7 @@ export default async function SolutionPage({ params }: SolutionPageProps) {
           </div>
         </div>
 
-        <CommentsSection 
-          comments={comments}
-          replyTo={solutionId}
-          replyType="solution"
-          language={language}
-        />
+        <CommentsSection />
       </div>
     </div>
   );
