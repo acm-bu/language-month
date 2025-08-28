@@ -41,7 +41,7 @@ export default async function LanguagePage({ params }: LanguagePageProps) {
   const firstDayOfMonth = new Date(Date.UTC(year, month, 1));
   const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0));
   
-  const startingDayOfWeek = (firstDayOfMonth.getUTCDay() + 6) % 7;
+  const startingDayOfWeek = firstDayOfMonth.getUTCDay() === 0 ? 6 : firstDayOfMonth.getUTCDay() - 1;
   
   const calendarData: (null | {
     day: number;
