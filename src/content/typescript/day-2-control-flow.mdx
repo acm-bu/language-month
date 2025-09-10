@@ -250,6 +250,44 @@ doSomethingThatRequriesAResource(resource);
 
 The `if (!resource)` will return false if `resource` is any falsy value causing an error to be thrown. This will always ensure that `resource` is not `null` or `undefined`, but it's better to just check `(resource !== null && resource !== undefined)` for readability purposes.
 
+## Switch Statements
+Switch statements look nearly identical in javascript to C++.
+
+```ts
+let fullName = ""
+
+switch (role) {
+  case "QB":
+    fullName = "Quarterback";
+    break;
+  case "OL":
+    fullName = "Offensive Line";
+    break;
+  case "DL":
+    fullName = "Defensive Line";
+    break;
+  case "S":
+    fullName = "Safety";
+    break;
+  case "TE":
+    fullName = "Tight End";
+    break;
+  case "RB":
+    fullName = "Running Back";
+    break;
+  case "K":
+    fullName = "Kicker";
+    break;
+  case "P":
+    fullName = "Punter";
+    break;
+  case "WR":
+    fullName = "Wide Receiver";
+    break;
+}
+```
+
+The break statements are necessary to avoid weird passthrough between cases which is pretty much never what you want to happen. You can also use early returns if applicable.
 
 # Loops
 For loops work like they do in most C inspired languages:
@@ -301,4 +339,21 @@ while (n < 100) {
 }
 ```
 
+Statements familiar from almost all languages like `break` and `continue` will also work in javascript loops the same way you'd expect.
+
 # Puzzle
+For this first puzzle, create a calculator command line application. The program should read in lines from the console in the format `<number> <operator> <number>` where `<number>` can be any number and `<operator>` can be either `+`, `-`, `*`, or `/`. Below is the starter code which shows how to read lines from a console (since this requires `await`, which we haven't covered yet). You'll have to research and learn on your own:
+
+- how to split a string
+- how to turn a string into a number
+
+```ts
+
+// this is a "weird" for loop using a special AsyncIterator pattern. It's the
+// most convinient way to read from the console in modern javascript
+for await (const line of console) {
+  // this will just echo whatever was last inputted
+  console.log(line);
+}
+```
+
