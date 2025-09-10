@@ -1,6 +1,6 @@
 
 # Day Two
-Today we'll be talking about typescript control flow concepts. It's assumed that you've spent 
+Today we're gonna be taking a quick tour through the basic usage of the language. I'm going to assume you're familiar with at least one other programming language. If you're in CSI 1430 for C++ or took an AP CS class in high school and learned something like 
 
 
 # Variables
@@ -37,20 +37,131 @@ const e = ["one", "two", "three"];
 Now we'll go in depth on the different types of variables
 
 ## Primitives
+There are several types of primitives:
+- `number`
+- `string`
+- `boolean`
+- `undefined`
+- `null`
+- `symbol`
+- `bigint`
 
-## Objects
+We won't be talking about `bigint` or `symbol` since they are very uncommon and out of scope for the purposes of a basic tutorial
+
+### Booleans
+Simple and works like you'd think. Either `true` or `false`. The `true` and `false` keywords are lowercase, unlike python's uppercase ones (which I hate!).
+
+```ts
+let foo = false;
+let bar = true;
+```
+
+
+### Numbers
+If you come from C++ or Java where there is a distinction between ints and floats, you're probably wondering why there's simply a `number` type rather than a distinction between ints and floats as well as the number of bits each one holds.
+
+Internally, all numbers are 64 bit IEEE 754 double precision floats. You don't really need to worry about the underlying number implementation; the language abstracts all that away from you. JS/TS is not a good fit for serious mathematial computation. Numbers are declared how you'd expect:
+
+```ts
+let foo = 5;
+let bar = -8;
+let baz = 50.12371;
+
+let twoThirds = 2 / 3;
+// ^ logging this would output 0.666666666666666666666
+```
+
+
+### Strings
+Strings are implemented as a primitive type in typescript. There is no concept of an individual character and you can always think of strings
+
+You can define strings using either double quotes or single quotes. Different parts of the ecosystem have different preferences for single or double, so just use whatever you please. I'll be using double for this course since that's what my muscle memory is trained for.
+
+```ts
+let myString = "hello!";
+const otherString = "constant string";
+const singleQuoteString = 'this works too!';
+const stringLiteral = `We'll talk about this one in a bit!`;
+
+const h = myString[0];
+// this is "h";
+const otherH = myString.at(0);
+
+// there are lots of different string methods. See the MDN
+// docs for an exhaustive list of what you can do. 
+const upper = myString.toUpperCase();
+const lower = upper.toLowerCase();
+
+
+```
+
+See the [MDN String Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String) for more information on strings.
+
+
+You can also easily make string literals with backtick strings:
+
+```ts
+let myNum = 5;
+
+// any expression can go in the ${...}. Javascript will foce it to be
+// a string somehow, so you can even print functions this way (although
+// you probably don't want to do that ).
+let coolString = `I have ${myNum} things!`;
+
+```
 
 ## Arrays
+You can conviniently define arrays using the bracket syntax:
+
+```ts
+
+// defines an array of strings. The string[] is optional unless the array is empty at the start
+const baylorOLine: string[] = ["Sidney Fugar", "Ryan Lengyel", "Coleton Price", "Omar Aigbedion"];
+
+// the const part of the array doesn't mean the array itself can't be modified, just that `baylorOLine` can't be
+// updated to point to a different array.
+baylorOLine.push("Kaden Sieracki");
+```
+
+There is also the [Array Spread](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) syntax which I will not go into detail on here, but you should definitely check out.
+
+
+## Objects
+An object in typescript can be defined by placing keys and values inside of `{}`. All non-primitive values are actually objects (including arrays).
+
+```ts
+const objectExample = {
+  name: "Sawyer Robertson",
+  position: "QB",
+  age: 22,
+  games: [
+    {
+      opponent: "SMU",
+      victory: true,
+      passingYards: 440,
+      rushingYards: 20,
+      touchdowns: 4,
+      completionPercentage: 34 / 50, // you can put any expression here as well
+    },
+    // ...
+  ],
+}
+
+
+// you can then access properties of objects with the . notation:
+console.log(objectExample.games[0].touchdowns);
+// ^ outputs 4
+```
+
+Javascript is garbage collected. You don't need to worry about allocating and deallocating memory. You can also just "make up" any object shape you want.
+
 
 ## Null and Undefined
-There are two ways of something "not existing"
+There are two ways of something "not existing": `null` and `undefined`. This is arguably a design flaw in the language. You *should* use `null` to mean "this is not here and that's ok" and undefined to mean "this is not here and that's *not* ok" but in reality you'll just encounter them a bunch and have to deal with it.
 
-# Truthiness and Falsiness
-As a rule of thumb, truthiness and falsiness are concepts you should write code to avoid, not embrace. However, they are still important, so I'll explain them here.
 
 
 # If/else
-
 If else works like it does in most other programming languages:
 ```ts
 if (condition) {
@@ -88,12 +199,106 @@ if (a === b) {
 }
 ```
 
-This code block prints the "correct" output of "they are not equal." Remember: types only exist
+This code block prints the "correct" output of "they are not equal." Remember: types only exist at the compile time level, but are effectively erased at runtime. Javascript lets you get awawy with anything, while typscript stops you from shooting yourself in the foot.
 
 **DO NOT EVER USE THE == OPERATOR OR != OPERATOR. ALWAYS USE === or !==**
 
+## Truthiness and Falsiness
+As a rule of thumb, truthiness and falsiness are concepts you should write code to avoid, not embrace. However, they are still important, so I'll explain them here.
 
-# For Loops
+If I have a statement like such:
 
+```ts
+
+let value = "" // ... (we will pretend this is a lot of different things) 
+
+if (value) {
+  console.log("Value is truthy!");
+} else {
+  console.log("Value is falsy!");
+}
+```
+
+This code actually works fine. You don't necessarily *need* a boolean to be evaluated in your if statement. All expressions will be coerced into a "truthy" or a "falsy" value based on some simple rules
+
+All values are truthy, except:
+- `false`
+- `0`
+- `-0` (yes, this is a thing)
+- `0n`
+- `""` (any empty string)
+- `null`
+- `undefined`
+- `NaN`
+- The special object `document.all` for whatever reason
+
+See the [MDN Docs on Truthiness](https://developer.mozilla.org/en-US/docs/Glossary/Truthy) for a deeper explanation. This is why you'll often see:
+
+```ts
+const resource = getTheResourceButItCouldBeNull();
+
+// resource is some Resource type or null right now
+if (!resource) {
+  throw new Error("Resource was null");
+}
+
+// typescript compiler now knows that the resource
+// is whatever type `getTheResourceButItCouldBeNull`
+// returns
+doSomethingThatRequriesAResource(resource);
+```
+
+The `if (!resource)` will return false if `resource` is any falsy value causing an error to be thrown. This will always ensure that `resource` is not `null` or `undefined`, but it's better to just check `(resource !== null && resource !== undefined)` for readability purposes.
+
+
+# Loops
+For loops work like they do in most C inspired languages:
+
+```ts
+const n = 100;
+let sum = 0;
+
+for (let i = 0; i < n; i++) {
+  sum += i;
+}
+
+console.log(sum);
+```
+
+
+This is a little inconvinient for arrays. There are two other ways you can conviniently iterate over an array:
+
+```ts
+const myArray = [1, 2, 3, 4, 5, 6];
+
+for (let value of myArray) {
+  // note: this does not affect the value inside of myArray since
+  // primitive types are passed around by copy. If myArray was an
+  // array of objects, you could iterate through it while editing
+  // the objects
+  value += 1;
+
+  console.log(value);
+}
+
+// this is another method that uses a lambda function. We'll talk about lambda functions later.
+//
+// we are essentially making an inline function and then passing in that function as the argument
+// to another function. Javascript has amazing support for first class function operations 
+myArray.forEach((value, i) => {
+  console.log(`${value} is at position ${i}`);
+});
+
+```
+
+Of course, there are also while loops, which work as expected
+
+```ts
+let n = 0;
+while (n < 100) {
+  console.log("Approaching 100...");
+  n += 10;
+}
+```
 
 # Puzzle
