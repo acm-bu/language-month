@@ -1,0 +1,36 @@
+
+# Day Three
+Today we're gonna be talking about functions. 
+
+# Functions
+
+You can simply define a function like such:
+
+
+```ts
+function fibonacci(n) {
+  if (n === 0) {
+    return 0;
+  } else if (n === 1) {
+    return 1;
+  } else {
+    return fibonacci(n - 1) + fibonacci(n - 2);
+  }
+}
+
+const result = fibonacci(10);
+```
+
+
+You can also define functions anonymously. In javascript, functions are just variables that can be passed around like anything else. Here's an example:
+
+```ts
+
+const myFunction = () => {
+
+}
+
+```
+
+This means that you can have functions that take other functions as input, or functions that return another function as output. You typically don't have to worry about scope. As a rule, if the variable is less indented than your function, you can use it. This allows for effective use of the [closure pattern](https://en.wikipedia.org/wiki/Closure_(computer_programming)).
+
