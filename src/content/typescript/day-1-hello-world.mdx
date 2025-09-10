@@ -1,31 +1,124 @@
 
-Hello, world! this is the puzzle description written in an mdx file!
+# Day One
+Welcome to the ACM Typescript Language Month! There are 16 puzzles in this course developed to give you the tools to successfully read and write typescript code
 
-```ts
-export const myFunction = () => {
-  console.log("Syntax highlighting should be working")
-}
+# What is Typescript?
+You've probably heard about Javascript. Javascript is a language native to the web. It is a just-in-time compiled language that is **loosely typed**. It's since expanded its influence pretty much everywhere and you almost definitely encounter it at least once if you pursue a career in anything software adjacent. 
+
+Typescript is a language that compiles into javascript. It "fixes" javascript's loose typing by adding one of the most robust type systems. If you know typescript, you automatically know javascript as typescript is a *superset* of typescript. We focus on typescript to learn two things:
+- advanced type level programming patterns that will reframe the way you think about objects and interfaces in any language
+- ability to understand and work with javascript codebases. You'll need this at least once in your career
+
+# Environment Setup
+The first day will see you setting up your environment. We will be using [bun](https://bun.com/) to run all typescript code. If at any point you run into issues setting up your environment, write a comment down below. You can also email `me@jdeiss.com` and I'll get back to you with help as soon as I can.
+
+#### Why not Node?
+If you've ever had any introduction to the javascript or typescript ecosystem you probably used [node js](https://nodejs.org/en) rather than bun. We are using bun instead of node for this tutorial since running just plain typescript code can be kind of 
+
+
+### Special Setup for Windows Users
+If you're on windows, you will need to be using WSL (Windows Subsystem for Linux) for this. Support for this kind of stuff is pretty terrible on windows, so you might actually find that WSL is useful for your standard computer science homework as well.
+
+[WSL Instalation Guide](https://learn.microsoft.com/en-us/windows/wsl/install)
+
+## Installing Bun
+Open up a terminal on your computer (or in your WSL instance) and run the following command:
+
+```bash
+curl -fsSL https://bun.sh/install | bash
 ```
 
-- also
-- we 
-- have
-- lists
+After that, just run the `bun` command on the terminal. You should see output like the following:
+
+```bash
+$ bun
+
+Bun is a fast JavaScript runtime, package manager, bundler, and test runner. (1.2.19+aad3abead)
+
+Usage: bun <command> [...flags] [...args]
+
+Commands:
+  run       ./my-script.ts       Execute a file with Bun
+            lint                 Run a package.json script
+  test                           Run unit tests with Bun
+  x         bun-repl             Execute a package binary (CLI), installing if needed (bunx)
+  repl                           Start a REPL session with Bun
+  exec                           Run a shell script directly with Bun
+
+  install                        Install dependencies for a package.json (bun i)
+  add       hono                 Add a dependency to package.json (bun a)
+  remove    underscore           Remove a dependency from package.json (bun rm)
+  update    react                Update outdated dependencies
+  audit                          Check installed packages for vulnerabilities
+  outdated                       Display latest versions of outdated dependencies
+  link      [<package>]          Register or link a local npm package
+  unlink                         Unregister a local npm package
+  publish                        Publish a package to the npm registry
+  patch <pkg>                    Prepare a package for patching
+  pm <subcommand>                Additional package management utilities
+  info      lyra                 Display package metadata from the registry
+
+  build     ./a.ts ./b.jsx       Bundle TypeScript & JavaScript into a single file
+
+  init                           Start an empty Bun project from a built-in template
+  create    elysia               Create a new project from a template (bun c)
+  upgrade                        Upgrade to latest version of Bun.
+  <command> --help               Print help text for command.
+
+Learn more about Bun:            https://bun.com/docs
+Join our Discord community:      https://bun.com/discord
+```
+
+If you don't, it's probably because you forgot to configure your path variable after install. Make sure the following lines are in your `~/.bashrc`:
+
+```bash
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+```
+
+Then reload your shell. Once you have bun installed, you want to install the typescript compiler. Simply run:
+
+```bash
+bun install -g typescript
+```
+
+## Editor Setup
+### Neovim
+If you do not normally use neovim, ignore this section and move on to VSCode. Neovim is great, but trying to learn two new things at the same time will be overwhelming. 
+
+If you're on neovim, you will probably just need to "figure it out" based on whatever your configuration is. You can technically do everything in this course without a language server, but it's best to use one. For the rest of this course I will be assuming that the person going through it is using vscode. Whenever the `code` 
+
+### VSCode
+VSCode is the idiomatic editor for typescript. You can install it [here](https://code.visualstudio.com/docs/setup/setup-overview). If you're on windows, make sure to follow [this guide](https://code.visualstudio.com/docs/remote/wsl) to enable development in WSL. 
+
+Once you have VSCode up and running, you're going to want to install the [typescript extension](https://code.visualstudio.com/docs/languages/typescript) for VSCode to get good autocomplete.
+
+## Workspace Setup
+For the rest of this course you will probably want some sort of workspace. Create a new one in your terminal:
+
+```bash
+cd  # go back to your home directory
+mkdir typescript-language-month
+cd typescript-language-month
+
+mkdir day-one
+cd day-one
+bun init  # init the bun file for here
+code . # if you're using neovim, open neovim instead
+```
+
+The `index.ts` file is your home file for this project. Ignore the other files, they are project setup files. We will talk about them later.
 
 
-1. and
-2. numbered
-3. lists
+
+# The Puzzle
+Somewhere along the way one of these instructions for setting up your environment won't work. Fight through it. If you're struggling, post in the comments or shoot me an email at `me@jdeiss.com`. 
+
+"Puzzle" isn't really a fair way to describe the problem for today. Setting up your environment is enough of a puzzle. Congrats on fighting whatever errors stood in your way of getting here. Now, simply write a hello program. It should look like this:
+
+```ts
+console.log("Hello, world!");
+```
 
 
-# Header 1
-## Header 2
-### Header 3
-#### Header 4
-
-Honestly, anything past h4 is just plain ridiculous and evidence that you should really restructure your content. We can do *italics* for emphasis and **bold** for much stronger emphasis.
-
-In the middle of a sentence, we may want to do `code` and then just continue on with life.
-
-Sometimes, we may also want to link to somewhere else, like just an [example link](https://google.com) to google.
-
+Once you have that successfully outputting, post your solution by pressing the "Post solution" button. The next puzzle will open tomorrow, where we will actually write some real code. 
