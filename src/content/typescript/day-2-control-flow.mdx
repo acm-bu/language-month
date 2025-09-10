@@ -1,2 +1,99 @@
 
+# Day Two
+Today we'll be talking about typescript control flow concepts. It's assumed that you've spent 
 
+
+# Variables
+There are three ways to declare variables in typescript: `let`, `var`, and `const`. In short:
+- Use `const` by default. 
+- Use `let` if you plan to change the variable later
+- don't use `var`. It's baggage from earlier versions and has some [footguns]
+
+Note that `const` just means that the *reference* cannot be changed, so while a `const` array can have its elements edited, a `const` number. Additionally, a `const` object can have its
+
+Here's some examples of declaring variables. They do what you would expect them to do:
+```ts
+let a = 5;
+// the let <var>: <type> allows you to specify the type. If unspecified, typescript will just infer
+let b: number = 6;
+let c: string = "hello!";
+
+// note that semicolons are optional in javascript/typescript but stillr ecommended
+const d = {
+  property: "value",
+  deeper: {
+    yes: "this works!",
+  },
+};
+
+const e = ["one", "two", "three"];
+// this could be also be declared as:
+// const e: string[] = ["one", "two", "three"];
+// 
+// if you want to specify that e is an array of strings
+
+```
+
+Now we'll go in depth on the different types of variables
+
+## Primitives
+
+## Objects
+
+## Arrays
+
+## Null and Undefined
+There are two ways of something "not existing"
+
+# Truthiness and Falsiness
+As a rule of thumb, truthiness and falsiness are concepts you should write code to avoid, not embrace. However, they are still important, so I'll explain them here.
+
+
+# If/else
+
+If else works like it does in most other programming languages:
+```ts
+if (condition) {
+  // do stuff
+} else if (other condition) {
+  // do stuff
+} else {
+  // do other stuff
+}
+```
+
+The tricky part comes with comparisons. `<`, `>`, `<=`, and `>=` work as expected. The trouble comes with equal. Take the following example
+
+```ts
+let a = 1;
+let b = "1";
+
+if (a == b) {
+  console.log("They are equal");
+} else {
+  console.log("they are not equal");
+}
+```
+
+You would expect this to either be not equal or throw an error because `a` is a number and `b` is a string. For whatever reason, javascript was originally designed to have the string one equal to the number one. Obviously, this is massive footgun and never really something you want to happen. This is why javascript has the `===` to hide baggage from old versions
+
+```ts
+let a = 1;
+let b = "1";
+
+if (a === b) {
+  console.log("They are equal");
+} else {
+  console.log("they are not equal");
+}
+```
+
+This code block prints the "correct" output of "they are not equal." Remember: types only exist
+
+**DO NOT EVER USE THE == OPERATOR OR != OPERATOR. ALWAYS USE === or !==**
+
+
+# For Loops
+
+
+# Puzzle
