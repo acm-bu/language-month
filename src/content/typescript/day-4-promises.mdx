@@ -1,0 +1,177 @@
+# Day Four
+Today we're talking about promises. Promises are how JavaScript handles asynchronous operations.
+
+# What are Promises?
+A promise represents a value that might not be available yet but will be at some point in the future. Think of it like ordering food - you get a receipt (the promise) immediately, but you have to wait for the actual food (the resolved value).
+
+```ts
+// This returns a Promise<string>
+function fetchUserName(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    // Simulate network delay
+    setTimeout(() => {
+      resolve("John Doe");
+    }, 1000);
+  });
+}
+```
+
+# Promise States
+A promise can be in one of three states:
+- **Pending**: The operation hasn't completed yet
+- **Fulfilled**: The operation completed successfully
+- **Rejected**: The operation failed
+
+```ts
+const promise = new Promise<number>((resolve, reject) => {
+  const random = Math.random();
+  
+  if (random > 0.5) {
+    resolve(42); // Success!
+  } else {
+    reject(new Error("Random number too low")); // Failure!
+  }
+});
+```
+
+# Using Promises with .then()
+You handle promise results with `.then()` for success and `.catch()` for errors:
+
+```ts
+fetchUserName()
+  .then((name) => {
+    console.log(`Hello, ${name}!`);
+  })
+  .catch((error) => {
+    console.log("Failed to get name:", error);
+  });
+```
+
+You can chain promises together:
+
+```ts
+function fetchUserId(): Promise<number> {
+  return Promise.resolve(123);
+}
+
+function fetchUserProfile(id: number): Promise<object> {
+  return Promise.resolve({ id, email: "user@example.com" });
+}
+
+fetchUserId()
+  .then((id) => fetchUserProfile(id))
+  .then((profile) => {
+    console.log("Profile:", profile);
+  })
+  .catch((error) => {
+    console.log("Something went wrong:", error);
+  });
+```
+
+# Async/Await
+Async/await is syntactic sugar that makes promises easier to work with:
+
+```ts
+async function getUserInfo() {
+  try {
+    const id = await fetchUserId();
+    const profile = await fetchUserProfile(id);
+    const name = await fetchUserName();
+    
+    console.log(`User ${name} has profile:`, profile);
+  } catch (error) {
+    console.log("Error:", error);
+  }
+}
+
+getUserInfo();
+```
+
+Any function marked with `async` automatically returns a promise. Inside async functions, you can use `await` to pause execution until a promise resolves.
+
+# Common Promise Utilities
+
+```ts
+// Wait for all promises to complete
+const promises = [fetchUserId(), fetchUserName()];
+const results = await Promise.all(promises);
+console.log("All results:", results);
+
+// Wait for the first promise to complete
+const firstResult = await Promise.race(promises);
+console.log("First result:", firstResult);
+
+// Create an immediately resolved promise
+const immediate = Promise.resolve("Done!");
+
+// Create an immediately rejected promise
+const failed = Promise.reject(new Error("Oops!"));
+```
+
+# Error Handling
+Always handle promise rejections. Unhandled rejections can crash your program:
+
+```ts
+// Bad - unhandled rejection
+fetchUserName(); // If this fails, your program might crash
+
+// Good - handled rejection
+fetchUserName().catch(() => {
+  console.log("Failed to fetch name, using default");
+});
+
+// Good - with async/await
+async function safeGetUserName() {
+  try {
+    return await fetchUserName();
+  } catch {
+    return "Anonymous User";
+  }
+}
+```
+
+# Puzzle
+Create a simple task manager that simulates async operations. Your program should:
+
+1. Create a function `simulateTask(name: string, duration: number): Promise<string>` that returns a promise resolving after `duration` milliseconds with the message `"Task '${name}' completed"`
+
+2. Create a function `runTasksSequentially(tasks: Array<{name: string, duration: number}>)` that runs tasks one after another using async/await
+
+3. Create a function `runTasksConcurrently(tasks: Array<{name: string, duration: number}>)` that runs all tasks at the same time using Promise.all
+
+4. Test your functions with these tasks:
+   ```ts
+   const tasks = [
+     { name: "Download file", duration: 2000 },
+     { name: "Process data", duration: 1500 },
+     { name: "Upload results", duration: 1000 }
+   ];
+   ```
+
+5. Log the start time, end time, and total duration for both sequential and concurrent execution
+
+Starter code:
+```ts
+function simulateTask(name: string, duration: number): Promise<string> {
+  // Your implementation here
+}
+
+async function runTasksSequentially(tasks: Array<{name: string, duration: number}>) {
+  // Your implementation here
+}
+
+async function runTasksConcurrently(tasks: Array<{name: string, duration: number}>) {
+  // Your implementation here
+}
+
+// Test your functions
+const tasks = [
+  { name: "Download file", duration: 2000 },
+  { name: "Process data", duration: 1500 },
+  { name: "Upload results", duration: 1000 }
+];
+
+// Run tests here
+```
+
+Submit your solution when you're done!

@@ -12,20 +12,24 @@ import { LanguageCourse } from ".";
 const typescript: LanguageCourse = {
   title: "Typescript",
   language: "typescript",
-  dateOpen: new Date("2025-09-29"),
+  dateOpen: new Date("2025-10-01"),
   description: "Learn typescript for web appications",
   puzzles: [
     {
       id: "day-1-hello-world",
-      date: new Date("2025-09-29"),
+      date: new Date("2025-10-01"),
       title: "Day One: Hello, Typescript!"
     },
     {
       id: "day-2-control-flow",
-      date: new Date("2025-09-30"),
-      title: "Day One: Hello, Typescript!"
+      date: new Date("2025-10-02"),
+      title: "Day Two: Control Flow"
     },
-
+    {
+      id: "day-3-functions",
+      date: new Date("2025-10-03"),
+      title: "Day Three: Functions and Classes",
+    },
   ],
 };
 
