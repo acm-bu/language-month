@@ -10,7 +10,7 @@ The JavaScript/TypeScript ecosystem has three major runtimes:
 
 **Deno** - Built by Node's creator to fix design issues. Built-in TypeScript support, URL-based imports, built-in package manager. More secure by default but smaller ecosystem.
 
-**Bun** - The newest runtime focused on speed. Built-in TypeScript support, package manager, bundler, and test runner. Compatible with Node packages but much faster. We use Bun because it's simpler for learning.
+**Bun** - The newest runtime focused on speed. Built-in TypeScript support, package manager, bundler, and test runner. Compatible with Node packages but much faster.
 
 ```bash
 # Bun - all-in-one tool
@@ -23,6 +23,11 @@ npm install -g typescript
 tsc script.ts && node script.js
 ```
 
+For this tutorial we have been using bun since it "just works" with typescript. Node is currently still the industry standard, and what you'll most likely be using if you ever encounter
+
+# Javascript on the Web
+TODO: explain how javascript executes on the web and the difference between web 
+
 # Importing Files
 
 TypeScript uses ES6 modules for importing and exporting code between files.
@@ -31,6 +36,8 @@ TypeScript uses ES6 modules for importing and exporting code between files.
 
 ```ts
 // math.ts
+// the export keyword marks a function, class, variable, or type as
+// available to be imported by some other module
 export function add(a: number, b: number): number {
   return a + b;
 }
