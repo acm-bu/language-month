@@ -96,6 +96,7 @@ Any function marked with `async` automatically returns a promise. Inside async f
 const promises = [fetchUserId(), fetchUserName()];
 const results = await Promise.all(promises);
 console.log("All results:", results);
+// results will be an array of each promise resolved
 
 // Wait for the first promise to complete
 const firstResult = await Promise.race(promises);

@@ -1,0 +1,317 @@
+# Day Six
+
+Today we're diving into the TypeScript ecosystem - how to work with modules, packages, and the tools that make modern development possible.
+
+# Runtime Comparison: Bun vs Node vs Deno
+
+The JavaScript/TypeScript ecosystem has three major runtimes:
+
+**Node.js** - The original server-side JavaScript runtime. Uses npm for package management. Requires separate tools for TypeScript compilation and bundling. Still the most widely used in production.
+
+**Deno** - Built by Node's creator to fix design issues. Built-in TypeScript support, URL-based imports, built-in package manager. More secure by default but smaller ecosystem.
+
+**Bun** - The newest runtime focused on speed. Built-in TypeScript support, package manager, bundler, and test runner. Compatible with Node packages but much faster. We use Bun because it's simpler for learning.
+
+```bash
+# Bun - all-in-one tool
+bun install lodash
+bun run script.ts
+
+# Node - requires multiple tools  
+npm install lodash
+npm install -g typescript
+tsc script.ts && node script.js
+```
+
+# Importing Files
+
+TypeScript uses ES6 modules for importing and exporting code between files.
+
+## Basic Imports and Exports
+
+```ts
+// math.ts
+export function add(a: number, b: number): number {
+  return a + b;
+}
+
+export function multiply(a: number, b: number): number {
+  return a * b;
+}
+
+export const PI = 3.14159;
+
+// Default export
+export default function subtract(a: number, b: number): number {
+  return a - b;
+}
+```
+
+```ts
+// main.ts
+import subtract, { add, multiply, PI } from "./math";
+
+console.log(add(5, 3));        // 8
+console.log(multiply(4, 2));   // 8
+console.log(subtract(10, 4));  // 6
+console.log(PI);               // 3.14159
+```
+
+## Import Patterns
+
+```ts
+// Import everything
+import * as math from "./math";
+console.log(math.add(1, 2));
+
+// Import with alias
+import { add as sum } from "./math";
+console.log(sum(1, 2));
+
+// Import for side effects only
+import "./setup"; // Runs setup.ts code
+
+// Dynamic imports (returns a Promise)
+const math = await import("./math");
+console.log(math.add(1, 2));
+```
+
+## File Extensions and Paths
+
+```ts
+// Relative imports
+import { helper } from "./utils/helper";     // Same level
+import { config } from "../config";          // Parent directory
+import { types } from "../../types/index";   // Multiple levels up
+
+// Absolute imports (configured in tsconfig.json)
+import { api } from "@/services/api";        // Maps to src/services/api
+import { User } from "@/types/user";         // Maps to src/types/user
+```
+
+# Installing Packages
+
+Bun makes package management simple with its built-in package manager.
+
+## Installing Dependencies
+
+```bash
+# Install a package
+bun add lodash
+bun add @types/lodash  # Type definitions
+
+# Install development dependencies
+bun add -d typescript
+bun add -d @types/node
+
+# Install globally
+bun add -g typescript
+
+# Install specific version
+bun add lodash@4.17.21
+```
+
+## Using Installed Packages
+
+```ts
+// Using a third-party package
+import _ from "lodash";
+import { format } from "date-fns";
+
+const users = [
+  { name: "Alice", age: 30 },
+  { name: "Bob", age: 25 }
+];
+
+const sorted = _.sortBy(users, "age");
+console.log(sorted);
+
+const today = format(new Date(), "yyyy-MM-dd");
+console.log(today);
+```
+
+## Package.json
+
+Every project has a `package.json` file that describes dependencies and scripts:
+
+```json
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "date-fns": "^2.29.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "build": "bun build src/index.ts --outdir dist",
+    "test": "bun test"
+  }
+}
+```
+
+# Module Declaration
+
+Sometimes you need to tell TypeScript about modules that don't have type definitions.
+
+## Declaring External Modules
+
+```ts
+// types/custom.d.ts
+declare module "my-untyped-library" {
+  export function doSomething(input: string): number;
+  export const version: string;
+}
+
+// Now you can import it
+import { doSomething } from "my-untyped-library";
+```
+
+## Ambient Declarations
+
+```ts
+// types/globals.d.ts
+declare global {
+  interface Window {
+    myCustomApi: {
+      version: string;
+      init(): void;
+    };
+  }
+  
+  const BUILD_VERSION: string;
+}
+
+// Usage anywhere in your project
+window.myCustomApi.init();
+console.log(BUILD_VERSION);
+```
+
+## Module Augmentation
+
+```ts
+// Extending existing modules
+declare module "lodash" {
+  interface LoDashStatic {
+    customHelper(input: string): string;
+  }
+}
+
+// Now lodash has your custom method
+import _ from "lodash";
+_.customHelper("test"); // TypeScript knows about this
+```
+
+# Creating Packages
+
+You can create your own packages to share code between projects.
+
+## Project Structure
+
+```
+my-package/
+├── src/
+│   ├── index.ts
+│   ├── utils.ts
+│   └── types.ts
+├── dist/           # Built output
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Package Configuration
+
+```json
+{
+  "name": "@mycompany/my-package",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "bun run build"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.0.0"
+  }
+}
+```
+
+## Exporting from Your Package
+
+```ts
+// src/index.ts - main entry point
+export { createUser, updateUser } from "./user";
+export { validateEmail } from "./utils";
+export type { User, UserPreferences } from "./types";
+
+// Re-export everything
+export * from "./user";
+export * from "./utils";
+```
+
+## Publishing
+
+```bash
+# Build your package
+bun run build
+
+# Publish to npm registry
+bun publish
+
+# Install your package in other projects
+bun add @mycompany/my-package
+```
+
+# Puzzle
+
+Create a multi-file project that demonstrates the ecosystem concepts:
+
+1. **Project Setup**: Initialize a new project with `bun init`
+
+2. **Install Dependencies**: Add these packages:
+   - `date-fns` for date formatting
+   - `lodash` for utilities
+   - `@types/lodash` for type definitions
+
+3. **Create Files**:
+   - `src/types.ts`: Define a `BlogPost` interface with `id`, `title`, `content`, `publishDate`, and `tags`
+   - `src/utils.ts`: Export functions to format dates and filter posts by tag
+   - `src/data.ts`: Export an array of sample blog posts
+   - `src/index.ts`: Import everything and create a blog summary
+
+4. **Blog Functions**: Implement these in `utils.ts`:
+   ```ts
+   export function formatPostDate(date: Date): string;
+   export function filterPostsByTag(posts: BlogPost[], tag: string): BlogPost[];
+   export function getRecentPosts(posts: BlogPost[], days: number): BlogPost[];
+   ```
+
+5. **Module Declaration**: Create `types/custom.d.ts` and declare a global `APP_VERSION` constant
+
+6. **Package Scripts**: Add these scripts to `package.json`:
+   - `"start": "bun run src/index.ts"`
+   - `"build": "bun build src/index.ts --outdir dist"`
+
+7. **Test Your Setup**: Run `bun start` and verify all imports work correctly
+
+Starter structure:
+```
+blog-project/
+├── src/
+│   ├── types.ts
+│   ├── utils.ts  
+│   ├── data.ts
+│   └── index.ts
+├── types/
+│   └── custom.d.ts
+└── package.json
+```
+
+Submit your complete project structure when finished!

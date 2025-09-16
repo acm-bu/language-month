@@ -1,0 +1,361 @@
+# Day Five
+
+Types are where typescript actually gets interesting. Typescript is *structurally typed*. This is a middle ground between the strict typing of a language like C++ and the incredibly loose typing of a language like Python. 
+
+# Types
+
+You can define custom types to describe the shape of your data:
+
+```ts
+type User = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+type Status = "pending" | "completed" | "failed";
+
+const user: User = {
+  id: 1,
+  name: "Alice",
+  email: "alice@example.com"
+};
+```
+
+## Unions
+
+Union types let you specify that a value can be one of several types:
+
+```ts
+type ID = string | number;
+type Result = "success" | "error" | "loading";
+
+function getId(): ID {
+  return Math.random() > 0.5 ? "user_123" : 456;
+}
+
+const id = getId();
+// id is either string or number
+```
+
+You can narrow union types with type guards:
+
+```ts
+function processId(id: ID) {
+  if (typeof id === "string") {
+    // TypeScript knows id is string here
+    console.log(id.toUpperCase());
+  } else {
+    // TypeScript knows id is number here
+    console.log(id.toFixed(2));
+  }
+}
+```
+
+## Intersections
+
+Intersection types combine multiple types into one:
+
+```ts
+type Person = {
+  name: string;
+  age: number;
+};
+
+type Employee = {
+  employeeId: string;
+  department: string;
+};
+
+type Worker = Person & Employee;
+
+const worker: Worker = {
+  name: "Bob",
+  age: 30,
+  employeeId: "EMP123",
+  department: "Engineering"
+};
+```
+
+## Type Mappings
+
+You can create new types by transforming existing ones:
+
+```ts
+type User = {
+  id: number;
+  name: string;
+  email: string;
+};
+
+// Make all properties optional
+type PartialUser = Partial<User>;
+
+// Make all properties required
+type RequiredUser = Required<User>;
+
+// Pick specific properties
+type UserPreview = Pick<User, "id" | "name">;
+
+// Omit specific properties
+type CreateUser = Omit<User, "id">;
+
+// Custom mapping
+type UserEmails = {
+  [K in keyof User]: string;
+};
+```
+
+# Interfaces
+
+Interfaces define contracts for object shapes. They're similar to types but more extensible:
+
+```ts
+interface Animal {
+  name: string;
+  age: number;
+}
+
+interface Dog extends Animal {
+  breed: string;
+  bark(): void;
+}
+
+const myDog: Dog = {
+  name: "Rex",
+  age: 3,
+  breed: "Labrador",
+  bark() {
+    console.log("Woof!");
+  }
+};
+```
+
+You can merge interface declarations:
+
+```ts
+interface Config {
+  apiUrl: string;
+}
+
+interface Config {
+  timeout: number;
+}
+
+// Config now has both apiUrl and timeout
+const config: Config = {
+  apiUrl: "https://api.example.com",
+  timeout: 5000
+};
+```
+
+Interfaces can describe function types:
+
+```ts
+interface Calculator {
+  (a: number, b: number): number;
+}
+
+const add: Calculator = (a, b) => a + b;
+const multiply: Calculator = (a, b) => a * b;
+```
+
+And index signatures for dynamic properties:
+
+```ts
+interface StringDictionary {
+  [key: string]: string;
+}
+
+const translations: StringDictionary = {
+  hello: "hola",
+  goodbye: "adiós",
+  thanks: "gracias"
+};
+```
+
+# Generics
+
+Generics let you write reusable code that works with multiple types. These look much like templates in C++, but are far more advanced.
+
+```ts
+function identity<T>(arg: T): T {
+  return arg;
+}
+
+const stringResult = identity<string>("hello");
+const numberResult = identity<number>(42);
+
+// TypeScript can often infer the type
+const autoResult = identity("world"); // T is inferred as string
+```
+
+Generic interfaces and types:
+
+```ts
+interface Box<T> {
+  value: T;
+}
+
+const stringBox: Box<string> = { value: "hello" };
+const numberBox: Box<number> = { value: 42 };
+
+type ApiResponse<T> = {
+  data: T;
+  status: "success" | "error";
+  message?: string;
+};
+
+const userResponse: ApiResponse<User> = {
+  data: { id: 1, name: "Alice", email: "alice@example.com" },
+  status: "success"
+};
+```
+
+## Extends
+
+One of the best feature about generics is being able to specify a type that they extend from. You simply use the `extends` keyword here.
+
+```ts
+interface Identifiable {
+  id: string | number;
+}
+
+// T must have an id property
+function updateEntity<T extends Identifiable>(entity: T, updates: Partial<T>): T {
+  return { ...entity, ...updates };
+}
+
+const user = { id: 1, name: "Alice", email: "alice@example.com" };
+const product = { id: "prod-123", title: "Laptop", price: 999 };
+
+// Both work because they have id
+const updatedUser = updateEntity(user, { name: "Alice Smith" });
+const updatedProduct = updateEntity(product, { price: 899 });
+
+// This would error - string doesn't have id
+// const invalid = updateEntity("hello", { length: 10 });
+```
+
+You can constrain to specific types:
+
+```ts
+// T must be a key of the object
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+
+const person = { name: "Bob", age: 30, city: "Austin" };
+
+const name = getProperty(person, "name"); // string
+const age = getProperty(person, "age");   // number
+
+// This would error - "height" is not a key of person
+// const height = getProperty(person, "height");
+```
+
+## Generic Overuse
+Much like inheritance, it's incredibly easy to overuse generics. As a rule, **only use a generic when the type is used in more than one place**.
+
+```ts
+// Bad - generic used only once
+function badExample<T>(value: T): string {
+  return `Value: ${value}`;
+}
+
+// Good - just use the actual type
+function goodExample(value: string | number): string {
+  return `Value: ${value}`;
+}
+
+// Bad - unnecessary generic
+interface BadResponse<T> {
+  data: T;
+}
+
+function fetchUser(): BadResponse<User> {
+  // If you only ever return User, why make it generic?
+  return { data: { id: 1, name: "Alice", email: "alice@example.com" } };
+}
+
+// Good - generic used in multiple places
+function processArray<T>(items: T[], processor: (item: T) => T): T[] {
+  return items.map(processor);
+}
+
+// Good - generic provides real flexibility
+interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+}
+
+function fetchData<T>(url: string): Promise<ApiResponse<T>> {
+  // This can be reused for any data type
+  return fetch(url).then(res => res.json());
+}
+```
+
+# Puzzle
+
+Build a type-safe task management system. Create the following types and interfaces:
+
+1. Define a `Priority` type that can be "low", "medium", or "high"
+
+2. Create a `Task` interface with:
+   - `id`: number
+   - `title`: string  
+   - `description`: string
+   - `priority`: Priority
+   - `completed`: boolean
+   - `dueDate?`: Date (optional)
+
+3. Create a `TaskManager` interface with methods:
+   - `addTask(task: Omit<Task, "id">): Task`
+   - `updateTask(id: number, updates: Partial<Task>): Task | null`
+   - `deleteTask(id: number): boolean`
+   - `getTasks(): Task[]`
+   - `getTasksByPriority(priority: Priority): Task[]`
+
+4. Implement the `TaskManager` interface in a class called `SimpleTaskManager`
+
+5. Create a generic `FilterFunction<T>` type that represents a function taking a `T` and returning a boolean
+
+6. Add a method `filterTasks<T extends Task>(filter: FilterFunction<T>): T[]` to your task manager
+
+Starter code:
+
+```ts
+type Priority = // Your implementation
+
+interface Task {
+  // Your implementation
+}
+
+interface TaskManager {
+  // Your implementation
+}
+
+class SimpleTaskManager implements TaskManager {
+  private tasks: Task[] = [];
+  private nextId = 1;
+
+  // Implement all methods here
+}
+
+// Test your implementation
+const manager = new SimpleTaskManager();
+
+const task1 = manager.addTask({
+  title: "Learn TypeScript",
+  description: "Complete Day 5 exercises",
+  priority: "high",
+  completed: false,
+  dueDate: new Date("2024-12-31")
+});
+
+console.log("Created task:", task1);
+
+// Add more tests here
+```
+
+Submit your solution when complete!
