@@ -1,0 +1,725 @@
+# Day Eight
+
+Today we're diving deep into TypeScript's DOM (Document Object Model) capabilities. You'll learn how to safely manipulate web pages, handle events, and create dynamic user interfaces with full type safety.
+
+# Understanding the DOM
+
+The DOM is a programming interface for HTML documents. It represents the page structure as a tree of objects that JavaScript/TypeScript can manipulate.
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Page</title>
+</head>
+<body>
+  <div id="container">
+    <h1 class="title">Hello World</h1>
+    <button type="button">Click Me</button>
+  </div>
+</body>
+</html>
+```
+
+This HTML creates a DOM tree that TypeScript can access and modify:
+
+```ts
+// DOM selection methods
+const container = document.getElementById("container");           // HTMLElement | null
+const title = document.querySelector(".title");                  // Element | null  
+const button = document.querySelector("button");                 // HTMLButtonElement | null
+const allDivs = document.querySelectorAll("div");               // NodeListOf<Element>
+const titleByTag = document.getElementsByTagName("h1");         // HTMLCollectionOf<HTMLHeadingElement>
+```
+
+# Type Safety with DOM Elements
+
+TypeScript provides specific types for different HTML elements:
+
+```ts
+// Proper type assertions for better safety
+const container = document.getElementById("container") as HTMLDivElement;
+const input = document.querySelector("#email") as HTMLInputElement;
+const form = document.querySelector("form") as HTMLFormElement;
+const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+
+// Null checking - always important!
+const button = document.querySelector("button");
+if (button) {
+  button.textContent = "Updated Text";
+  button.disabled = true;
+}
+
+// Or use the non-null assertion operator (!) if you're certain it exists
+const certainButton = document.querySelector("button")!;
+certainButton.addEventListener("click", handleClick);
+```
+
+## Common Element Types
+
+```ts
+// Input elements
+const textInput = document.querySelector('input[type="text"]') as HTMLInputElement;
+const checkbox = document.querySelector('input[type="checkbox"]') as HTMLInputElement;
+const select = document.querySelector("select") as HTMLSelectElement;
+const textarea = document.querySelector("textarea") as HTMLTextAreaElement;
+
+// Media elements
+const image = document.querySelector("img") as HTMLImageElement;
+const video = document.querySelector("video") as HTMLVideoElement;
+const audio = document.querySelector("audio") as HTMLAudioElement;
+
+// Table elements
+const table = document.querySelector("table") as HTMLTableElement;
+const row = document.querySelector("tr") as HTMLTableRowElement;
+const cell = document.querySelector("td") as HTMLTableDataCellElement;
+```
+
+# DOM Manipulation
+
+TypeScript makes DOM manipulation safer with proper typing:
+
+```ts
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  category: string;
+}
+
+class ProductRenderer {
+  private container: HTMLElement;
+
+  constructor(containerId: string) {
+    const element = document.getElementById(containerId);
+    if (!element) {
+      throw new Error(`Container with id "${containerId}" not found`);
+    }
+    this.container = element;
+  }
+
+  renderProduct(product: Product): void {
+    // Create elements
+    const productCard = document.createElement("div");
+    const title = document.createElement("h3");
+    const price = document.createElement("span");
+    const category = document.createElement("span");
+    const button = document.createElement("button");
+
+    // Set attributes and classes
+    productCard.className = "product-card";
+    productCard.setAttribute("data-product-id", product.id.toString());
+    
+    price.className = "price";
+    category.className = "category";
+    button.type = "button";
+
+    // Set content
+    title.textContent = product.name;
+    price.textContent = `$${product.price.toFixed(2)}`;
+    category.textContent = product.category;
+    button.textContent = "Add to Cart";
+
+    // Build structure
+    productCard.appendChild(title);
+    productCard.appendChild(category);
+    productCard.appendChild(price);
+    productCard.appendChild(button);
+
+    // Add to container
+    this.container.appendChild(productCard);
+  }
+
+  clearProducts(): void {
+    this.container.innerHTML = "";
+  }
+
+  removeProduct(productId: number): void {
+    const productElement = this.container.querySelector(`[data-product-id="${productId}"]`);
+    if (productElement) {
+      productElement.remove();
+    }
+  }
+}
+```
+
+## Working with Attributes and Properties
+
+```ts
+const input = document.querySelector("#username") as HTMLInputElement;
+
+// Properties (live values)
+input.value = "john_doe";
+input.disabled = false;
+input.checked = true; // for checkboxes
+
+// Attributes (HTML attributes)
+input.setAttribute("placeholder", "Enter username");
+input.setAttribute("maxlength", "20");
+const placeholder = input.getAttribute("placeholder");
+
+// Data attributes
+input.dataset.userId = "123";
+input.setAttribute("data-role", "admin");
+const userId = input.dataset.userId; // "123"
+
+// CSS classes
+input.classList.add("form-control", "highlighted");
+input.classList.remove("error");
+input.classList.toggle("active");
+const hasError = input.classList.contains("error");
+
+// Inline styles
+input.style.borderColor = "red";
+input.style.backgroundColor = "#f0f0f0";
+input.style.setProperty("--custom-color", "#3498db");
+```
+
+# Event Handling
+
+TypeScript provides excellent type safety for event handling:
+
+```ts
+// Basic event listeners
+const button = document.querySelector("button")!;
+
+button.addEventListener("click", (event: MouseEvent) => {
+  event.preventDefault();
+  console.log("Button clicked!", event.target);
+});
+
+// Form handling
+const form = document.querySelector("form")!;
+
+form.addEventListener("submit", (event: SubmitEvent) => {
+  event.preventDefault();
+  
+  const formData = new FormData(form);
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  
+  handleLogin(email, password);
+});
+
+// Input events
+const searchInput = document.querySelector("#search") as HTMLInputElement;
+
+searchInput.addEventListener("input", (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const query = target.value;
+  performSearch(query);
+});
+
+// Keyboard events
+document.addEventListener("keydown", (event: KeyboardEvent) => {
+  if (event.ctrlKey && event.key === "s") {
+    event.preventDefault();
+    saveDocument();
+  }
+});
+```
+
+## Event Delegation
+
+Handle events efficiently with event delegation:
+
+```ts
+class TaskList {
+  private container: HTMLElement;
+
+  constructor(containerId: string) {
+    this.container = document.getElementById(containerId)!;
+    this.setupEventDelegation();
+  }
+
+  private setupEventDelegation(): void {
+    this.container.addEventListener("click", (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Handle delete button clicks
+      if (target.classList.contains("delete-btn")) {
+        const taskId = target.getAttribute("data-task-id");
+        if (taskId) {
+          this.deleteTask(parseInt(taskId));
+        }
+      }
+      
+      // Handle complete button clicks
+      if (target.classList.contains("complete-btn")) {
+        const taskId = target.getAttribute("data-task-id");
+        if (taskId) {
+          this.toggleTask(parseInt(taskId));
+        }
+      }
+    });
+  }
+
+  private deleteTask(taskId: number): void {
+    const taskElement = this.container.querySelector(`[data-task-id="${taskId}"]`);
+    taskElement?.closest(".task-item")?.remove();
+  }
+
+  private toggleTask(taskId: number): void {
+    const taskElement = this.container.querySelector(`[data-task-id="${taskId}"]`);
+    taskElement?.closest(".task-item")?.classList.toggle("completed");
+  }
+}
+```
+
+# Working with Forms
+
+TypeScript makes form handling much safer:
+
+```ts
+interface ContactForm {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  newsletter: boolean;
+}
+
+class FormHandler {
+  private form: HTMLFormElement;
+
+  constructor(formSelector: string) {
+    this.form = document.querySelector(formSelector) as HTMLFormElement;
+    this.setupForm();
+  }
+
+  private setupForm(): void {
+    this.form.addEventListener("submit", this.handleSubmit.bind(this));
+    
+    // Real-time validation
+    const inputs = this.form.querySelectorAll("input, textarea, select");
+    inputs.forEach(input => {
+      input.addEventListener("blur", this.validateField.bind(this));
+    });
+  }
+
+  private handleSubmit(event: SubmitEvent): void {
+    event.preventDefault();
+    
+    const formData = this.getFormData();
+    const errors = this.validateForm(formData);
+    
+    if (errors.length === 0) {
+      this.submitForm(formData);
+    } else {
+      this.displayErrors(errors);
+    }
+  }
+
+  private getFormData(): ContactForm {
+    const formData = new FormData(this.form);
+    
+    return {
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      subject: formData.get("subject") as string,
+      message: formData.get("message") as string,
+      newsletter: formData.get("newsletter") === "on"
+    };
+  }
+
+  private validateForm(data: ContactForm): string[] {
+    const errors: string[] = [];
+    
+    if (!data.name.trim()) {
+      errors.push("Name is required");
+    }
+    
+    if (!data.email.trim()) {
+      errors.push("Email is required");
+    } else if (!this.isValidEmail(data.email)) {
+      errors.push("Email format is invalid");
+    }
+    
+    if (!data.message.trim()) {
+      errors.push("Message is required");
+    }
+    
+    return errors;
+  }
+
+  private isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  private validateField(event: Event): void {
+    const field = event.target as HTMLInputElement | HTMLTextAreaElement;
+    const errorElement = this.form.querySelector(`#${field.name}-error`);
+    
+    let isValid = true;
+    let errorMessage = "";
+    
+    if (field.hasAttribute("required") && !field.value.trim()) {
+      isValid = false;
+      errorMessage = "This field is required";
+    } else if (field.type === "email" && field.value && !this.isValidEmail(field.value)) {
+      isValid = false;
+      errorMessage = "Please enter a valid email";
+    }
+    
+    field.classList.toggle("error", !isValid);
+    if (errorElement) {
+      errorElement.textContent = errorMessage;
+    }
+  }
+
+  private displayErrors(errors: string[]): void {
+    const errorContainer = document.querySelector(".form-errors");
+    if (errorContainer) {
+      errorContainer.innerHTML = errors.map(error => `<p class="error">${error}</p>`).join("");
+    }
+  }
+
+  private async submitForm(data: ContactForm): Promise<void> {
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (response.ok) {
+        this.showSuccess("Form submitted successfully!");
+        this.form.reset();
+      } else {
+        throw new Error("Form submission failed");
+      }
+    } catch (error) {
+      this.showError("Failed to submit form. Please try again.");
+    }
+  }
+
+  private showSuccess(message: string): void {
+    this.showMessage(message, "success");
+  }
+
+  private showError(message: string): void {
+    this.showMessage(message, "error");
+  }
+
+  private showMessage(message: string, type: "success" | "error"): void {
+    const messageElement = document.createElement("div");
+    messageElement.className = `message ${type}`;
+    messageElement.textContent = message;
+    
+    this.form.insertBefore(messageElement, this.form.firstChild);
+    
+    setTimeout(() => {
+      messageElement.remove();
+    }, 5000);
+  }
+}
+```
+
+# Local Storage Integration
+
+Persist data using the browser's localStorage API:
+
+```ts
+interface UserPreferences {
+  theme: "light" | "dark";
+  language: string;
+  notifications: boolean;
+}
+
+class PreferencesManager {
+  private static STORAGE_KEY = "user-preferences";
+
+  static save(preferences: UserPreferences): void {
+    try {
+      const json = JSON.stringify(preferences);
+      localStorage.setItem(this.STORAGE_KEY, json);
+    } catch (error) {
+      console.error("Failed to save preferences:", error);
+    }
+  }
+
+  static load(): UserPreferences | null {
+    try {
+      const json = localStorage.getItem(this.STORAGE_KEY);
+      if (json) {
+        return JSON.parse(json);
+      }
+    } catch (error) {
+      console.error("Failed to load preferences:", error);
+    }
+    return null;
+  }
+
+  static clear(): void {
+    localStorage.removeItem(this.STORAGE_KEY);
+  }
+}
+
+// Usage in a settings component
+class SettingsPanel {
+  private preferences: UserPreferences;
+
+  constructor() {
+    this.preferences = PreferencesManager.load() || {
+      theme: "light",
+      language: "en",
+      notifications: true
+    };
+    
+    this.render();
+    this.setupEventListeners();
+  }
+
+  private setupEventListeners(): void {
+    const themeSelect = document.querySelector("#theme") as HTMLSelectElement;
+    const langSelect = document.querySelector("#language") as HTMLSelectElement;
+    const notifCheckbox = document.querySelector("#notifications") as HTMLInputElement;
+
+    themeSelect.addEventListener("change", () => {
+      this.preferences.theme = themeSelect.value as "light" | "dark";
+      this.saveAndApply();
+    });
+
+    langSelect.addEventListener("change", () => {
+      this.preferences.language = langSelect.value;
+      this.saveAndApply();
+    });
+
+    notifCheckbox.addEventListener("change", () => {
+      this.preferences.notifications = notifCheckbox.checked;
+      this.saveAndApply();
+    });
+  }
+
+  private saveAndApply(): void {
+    PreferencesManager.save(this.preferences);
+    this.applyTheme();
+  }
+
+  private applyTheme(): void {
+    document.documentElement.setAttribute("data-theme", this.preferences.theme);
+  }
+
+  private render(): void {
+    // Update form controls to reflect current preferences
+    const themeSelect = document.querySelector("#theme") as HTMLSelectElement;
+    const langSelect = document.querySelector("#language") as HTMLSelectElement;
+    const notifCheckbox = document.querySelector("#notifications") as HTMLInputElement;
+
+    if (themeSelect) themeSelect.value = this.preferences.theme;
+    if (langSelect) langSelect.value = this.preferences.language;
+    if (notifCheckbox) notifCheckbox.checked = this.preferences.notifications;
+
+    this.applyTheme();
+  }
+}
+```
+
+# Animation and Transitions
+
+Create smooth animations using the Web Animations API:
+
+```ts
+class AnimationHelper {
+  static fadeIn(element: HTMLElement, duration: number = 300): Animation {
+    return element.animate([
+      { opacity: 0 },
+      { opacity: 1 }
+    ], {
+      duration,
+      easing: "ease-out",
+      fill: "forwards"
+    });
+  }
+
+  static slideDown(element: HTMLElement, duration: number = 300): Animation {
+    const height = element.scrollHeight;
+    
+    return element.animate([
+      { height: "0px", opacity: 0 },
+      { height: `${height}px`, opacity: 1 }
+    ], {
+      duration,
+      easing: "ease-out",
+      fill: "forwards"
+    });
+  }
+
+  static bounce(element: HTMLElement): Animation {
+    return element.animate([
+      { transform: "scale(1)" },
+      { transform: "scale(1.1)" },
+      { transform: "scale(0.95)" },
+      { transform: "scale(1)" }
+    ], {
+      duration: 600,
+      easing: "cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+    });
+  }
+}
+
+// Usage in a notification system
+class NotificationManager {
+  private container: HTMLElement;
+
+  constructor() {
+    this.container = document.getElementById("notifications")!;
+  }
+
+  async showNotification(message: string, type: "success" | "error" | "info" = "info"): Promise<void> {
+    const notification = document.createElement("div");
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+
+    this.container.appendChild(notification);
+
+    // Animate in
+    await AnimationHelper.fadeIn(notification, 300).finished;
+
+    // Auto-remove after 3 seconds
+    setTimeout(async () => {
+      await this.removeNotification(notification);
+    }, 3000);
+  }
+
+  private async removeNotification(notification: HTMLElement): Promise<void> {
+    // Animate out
+    await notification.animate([
+      { opacity: 1, transform: "translateX(0)" },
+      { opacity: 0, transform: "translateX(100%)" }
+    ], {
+      duration: 300,
+      easing: "ease-in"
+    }).finished;
+
+    notification.remove();
+  }
+}
+```
+
+# Puzzle
+
+Build a dynamic image gallery application with advanced DOM manipulation:
+
+1. **Project Setup**: Create a new Vite + TypeScript project
+
+2. **Gallery Features**: Implement these components:
+   - **Image Grid**: Display images in a responsive grid layout
+   - **Modal Viewer**: Click images to view full-size in a modal
+   - **Category Filter**: Filter images by category tags
+   - **Search**: Real-time search through image titles/descriptions
+   - **Upload Interface**: Drag-and-drop or click to upload new images
+   - **Image Editor**: Basic editing (brightness, contrast, filters)
+
+3. **TypeScript Requirements**:
+   ```ts
+   interface GalleryImage {
+     id: string;
+     title: string;
+     description: string;
+     src: string;
+     thumbnail: string;
+     category: string;
+     tags: string[];
+     uploadDate: Date;
+     size: {
+       width: number;
+       height: number;
+       fileSize: number;
+     };
+   }
+
+   interface FilterOptions {
+     category?: string;
+     searchQuery?: string;
+     dateRange?: {
+       start: Date;
+       end: Date;
+     };
+   }
+   ```
+
+4. **Core Functionality**:
+   - Type-safe DOM manipulation for all UI elements
+   - Event delegation for efficient event handling
+   - Local storage for persisting gallery data
+   - File API for image uploads and processing
+   - Canvas API for image editing features
+   - Intersection Observer for lazy loading
+   - Custom events for component communication
+
+5. **Advanced Features**:
+   - Keyboard navigation (arrow keys, ESC to close modal)
+   - Smooth animations for all interactions
+   - Responsive design with CSS Grid/Flexbox
+   - Error handling for failed uploads/invalid files
+   - Progress indicators for file operations
+   - Context menu for image operations (right-click)
+
+6. **Bonus Challenges**:
+   - Implement virtual scrolling for large galleries
+   - Add undo/redo functionality for edits
+   - Create shareable links for specific images
+   - Add batch operations (select multiple images)
+
+Starter structure:
+
+```ts
+// src/main.ts
+import "./style.css";
+
+class ImageGallery {
+  private images: GalleryImage[] = [];
+  private filteredImages: GalleryImage[] = [];
+  private container: HTMLElement;
+  private modal: HTMLElement;
+  private currentFilter: FilterOptions = {};
+
+  constructor(containerId: string) {
+    this.container = document.getElementById(containerId)!;
+    this.init();
+  }
+
+  private init(): void {
+    this.createModal();
+    this.setupEventListeners();
+    this.loadImages();
+    this.render();
+  }
+
+  // Implement all methods here
+}
+
+class ImageEditor {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private originalImageData: ImageData | null = null;
+
+  constructor(canvasElement: HTMLCanvasElement) {
+    this.canvas = canvasElement;
+    this.ctx = this.canvas.getContext("2d")!;
+  }
+
+  // Implement editing methods here
+}
+
+class FileUploader {
+  private dropZone: HTMLElement;
+  private fileInput: HTMLInputElement;
+
+  constructor(dropZoneId: string, fileInputId: string) {
+    this.dropZone = document.getElementById(dropZoneId)!;
+    this.fileInput = document.getElementById(fileInputId) as HTMLInputElement;
+    this.setupDragAndDrop();
+  }
+
+  // Implement upload methods here
+}
+
+new ImageGallery("gallery-container");
+```
+
+Your gallery should handle all user interactions with proper TypeScript typing, include comprehensive error handling, and provide a smooth user experience with animations and feedback. Submit your complete implementation!

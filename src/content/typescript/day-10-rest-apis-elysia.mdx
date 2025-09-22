@@ -1,0 +1,882 @@
+# Day Ten
+
+Today we're building REST APIs with Elysia, a high-performance TypeScript web framework built specifically for Bun. You'll learn how to create robust, type-safe APIs that can power web applications, mobile apps, and other services.
+
+# What is Elysia?
+
+Elysia is a modern web framework for Bun that focuses on:
+- **Type Safety**: End-to-end TypeScript support with automatic type inference
+- **Performance**: Built for Bun's speed with minimal overhead
+- **Developer Experience**: Excellent debugging, validation, and documentation
+- **Plugin Ecosystem**: Extensible architecture with reusable plugins
+
+# Setting Up Elysia
+
+Let's create a new Elysia project:
+
+```bash
+# Create a new Elysia project
+bun create elysia my-api
+cd my-api
+
+# Install dependencies (already done by create command)
+bun install
+
+# Start development server
+bun run dev
+```
+
+This creates a project structure like:
+
+```
+my-api/
+├── src/
+│   └── index.ts
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+# Your First API
+
+Here's a basic Elysia server:
+
+```ts
+// src/index.ts
+import { Elysia } from "elysia";
+
+const app = new Elysia()
+  .get("/", () => "Hello, Elysia!")
+  .get("/users/:id", ({ params }) => {
+    return {
+      id: params.id,
+      name: "John Doe",
+      email: "john@example.com"
+    };
+  })
+  .post("/users", ({ body }) => {
+    console.log("Creating user:", body);
+    return {
+      id: "123",
+      message: "User created successfully"
+    };
+  })
+  .listen(3000);
+
+console.log(`🦊 Elysia is running at http://localhost:3000`);
+```
+
+# Request Handling
+
+Elysia provides powerful request handling with full TypeScript support:
+
+```ts
+import { Elysia, t } from "elysia";
+
+const app = new Elysia()
+  // Query parameters
+  .get("/search", ({ query }) => {
+    const { q, page = "1", limit = "10" } = query;
+    return {
+      query: q,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      results: [`Result for "${q}"`]
+    };
+  })
+  
+  // Path parameters
+  .get("/users/:userId/posts/:postId", ({ params }) => {
+    return {
+      userId: params.userId,
+      postId: params.postId,
+      post: {
+        title: "Sample Post",
+        content: "This is a sample post"
+      }
+    };
+  })
+  
+  // Headers
+  .get("/profile", ({ headers }) => {
+    const authorization = headers.authorization;
+    if (!authorization) {
+      return new Response("Unauthorized", { status: 401 });
+    }
+    
+    return {
+      user: "authenticated-user",
+      token: authorization
+    };
+  })
+  
+  // Request body
+  .post("/login", ({ body }) => {
+    const { email, password } = body as {
+      email: string;
+      password: string;
+    };
+    
+    // Simulate authentication
+    if (email && password) {
+      return {
+        success: true,
+        token: "jwt-token-here"
+      };
+    }
+    
+    return new Response("Invalid credentials", { status: 400 });
+  })
+  
+  .listen(3000);
+```
+
+# Schema Validation
+
+Elysia includes built-in validation using a schema system:
+
+```ts
+import { Elysia, t } from "elysia";
+
+// Define schemas
+const UserSchema = t.Object({
+  name: t.String({ minLength: 2, maxLength: 50 }),
+  email: t.String({ format: "email" }),
+  age: t.Optional(t.Number({ minimum: 0, maximum: 120 })),
+  role: t.Union([t.Literal("user"), t.Literal("admin")])
+});
+
+const PostSchema = t.Object({
+  title: t.String({ minLength: 1, maxLength: 200 }),
+  content: t.String({ minLength: 10 }),
+  tags: t.Array(t.String()),
+  published: t.Boolean()
+});
+
+const app = new Elysia()
+  // Validate request body
+  .post("/users", ({ body }) => {
+    // body is automatically typed and validated
+    return {
+      id: Date.now().toString(),
+      ...body,
+      createdAt: new Date().toISOString()
+    };
+  }, {
+    body: UserSchema
+  })
+  
+  // Validate query parameters
+  .get("/users", ({ query }) => {
+    const { page, limit, role } = query;
+    return {
+      users: [],
+      pagination: {
+        page: page || 1,
+        limit: limit || 10,
+        total: 0
+      },
+      filters: role ? { role } : {}
+    };
+  }, {
+    query: t.Object({
+      page: t.Optional(t.Number({ minimum: 1 })),
+      limit: t.Optional(t.Number({ minimum: 1, maximum: 100 })),
+      role: t.Optional(t.Union([t.Literal("user"), t.Literal("admin")]))
+    })
+  })
+  
+  // Validate both params and body
+  .put("/users/:id", ({ params, body }) => {
+    return {
+      id: params.id,
+      ...body,
+      updatedAt: new Date().toISOString()
+    };
+  }, {
+    params: t.Object({
+      id: t.String({ pattern: "^[0-9]+$" })
+    }),
+    body: t.Partial(UserSchema)
+  })
+  
+  .listen(3000);
+```
+
+# Building a Complete CRUD API
+
+Let's build a blog API with full CRUD operations:
+
+```ts
+import { Elysia, t } from "elysia";
+
+// Types
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  author: string;
+  tags: string[];
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+  createdAt: string;
+}
+
+// In-memory storage (in production, you'd use a real database)
+const posts: Post[] = [];
+const users: User[] = [];
+let nextPostId = 1;
+let nextUserId = 1;
+
+// Schemas
+const CreatePostSchema = t.Object({
+  title: t.String({ minLength: 1, maxLength: 200 }),
+  content: t.String({ minLength: 10 }),
+  author: t.String(),
+  tags: t.Array(t.String()),
+  published: t.Boolean()
+});
+
+const UpdatePostSchema = t.Partial(CreatePostSchema);
+
+const CreateUserSchema = t.Object({
+  name: t.String({ minLength: 2, maxLength: 50 }),
+  email: t.String({ format: "email" }),
+  role: t.Union([t.Literal("user"), t.Literal("admin")])
+});
+
+const app = new Elysia()
+  // POSTS ENDPOINTS
+  
+  // Get all posts
+  .get("/posts", ({ query }) => {
+    let filteredPosts = posts;
+    
+    // Filter by author
+    if (query.author) {
+      filteredPosts = filteredPosts.filter(post => 
+        post.author.toLowerCase().includes(query.author!.toLowerCase())
+      );
+    }
+    
+    // Filter by published status
+    if (query.published !== undefined) {
+      filteredPosts = filteredPosts.filter(post => 
+        post.published === query.published
+      );
+    }
+    
+    // Filter by tags
+    if (query.tags) {
+      const searchTags = Array.isArray(query.tags) ? query.tags : [query.tags];
+      filteredPosts = filteredPosts.filter(post =>
+        searchTags.some(tag => post.tags.includes(tag))
+      );
+    }
+    
+    // Pagination
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    return {
+      posts: filteredPosts.slice(startIndex, endIndex),
+      pagination: {
+        page,
+        limit,
+        total: filteredPosts.length,
+        pages: Math.ceil(filteredPosts.length / limit)
+      }
+    };
+  }, {
+    query: t.Object({
+      author: t.Optional(t.String()),
+      published: t.Optional(t.Boolean()),
+      tags: t.Optional(t.Union([t.String(), t.Array(t.String())])),
+      page: t.Optional(t.Number({ minimum: 1 })),
+      limit: t.Optional(t.Number({ minimum: 1, maximum: 100 }))
+    })
+  })
+  
+  // Get single post
+  .get("/posts/:id", ({ params }) => {
+    const post = posts.find(p => p.id === params.id);
+    if (!post) {
+      return new Response("Post not found", { status: 404 });
+    }
+    return post;
+  }, {
+    params: t.Object({
+      id: t.String()
+    })
+  })
+  
+  // Create post
+  .post("/posts", ({ body }) => {
+    const post: Post = {
+      id: (nextPostId++).toString(),
+      ...body,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    posts.push(post);
+    return post;
+  }, {
+    body: CreatePostSchema
+  })
+  
+  // Update post
+  .put("/posts/:id", ({ params, body }) => {
+    const postIndex = posts.findIndex(p => p.id === params.id);
+    if (postIndex === -1) {
+      return new Response("Post not found", { status: 404 });
+    }
+    
+    posts[postIndex] = {
+      ...posts[postIndex],
+      ...body,
+      updatedAt: new Date().toISOString()
+    };
+    
+    return posts[postIndex];
+  }, {
+    params: t.Object({
+      id: t.String()
+    }),
+    body: UpdatePostSchema
+  })
+  
+  // Delete post
+  .delete("/posts/:id", ({ params }) => {
+    const postIndex = posts.findIndex(p => p.id === params.id);
+    if (postIndex === -1) {
+      return new Response("Post not found", { status: 404 });
+    }
+    
+    posts.splice(postIndex, 1);
+    return { message: "Post deleted successfully" };
+  }, {
+    params: t.Object({
+      id: t.String()
+    })
+  })
+  
+  // USERS ENDPOINTS
+  
+  // Get all users
+  .get("/users", ({ query }) => {
+    let filteredUsers = users;
+    
+    if (query.role) {
+      filteredUsers = filteredUsers.filter(user => user.role === query.role);
+    }
+    
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    
+    return {
+      users: filteredUsers.slice(startIndex, endIndex),
+      pagination: {
+        page,
+        limit,
+        total: filteredUsers.length,
+        pages: Math.ceil(filteredUsers.length / limit)
+      }
+    };
+  }, {
+    query: t.Object({
+      role: t.Optional(t.Union([t.Literal("user"), t.Literal("admin")])),
+      page: t.Optional(t.Number({ minimum: 1 })),
+      limit: t.Optional(t.Number({ minimum: 1, maximum: 100 }))
+    })
+  })
+  
+  // Create user
+  .post("/users", ({ body }) => {
+    // Check if email already exists
+    const existingUser = users.find(u => u.email === body.email);
+    if (existingUser) {
+      return new Response("Email already exists", { status: 400 });
+    }
+    
+    const user: User = {
+      id: (nextUserId++).toString(),
+      ...body,
+      createdAt: new Date().toISOString()
+    };
+    
+    users.push(user);
+    return user;
+  }, {
+    body: CreateUserSchema
+  })
+  
+  // Get user by ID
+  .get("/users/:id", ({ params }) => {
+    const user = users.find(u => u.id === params.id);
+    if (!user) {
+      return new Response("User not found", { status: 404 });
+    }
+    return user;
+  })
+  
+  .listen(3000);
+
+console.log("🚀 Blog API is running at http://localhost:3000");
+```
+
+# Middleware and Plugins
+
+Elysia supports middleware and plugins for reusable functionality:
+
+```ts
+import { Elysia, t } from "elysia";
+import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
+
+// Custom middleware
+const authMiddleware = (app: Elysia) =>
+  app.derive(({ headers }) => {
+    const token = headers.authorization?.replace("Bearer ", "");
+    
+    // Simple token validation (in production, verify JWT)
+    const isAuthenticated = token === "valid-token";
+    const user = isAuthenticated ? { id: "1", name: "John Doe", role: "admin" } : null;
+    
+    return {
+      auth: {
+        isAuthenticated,
+        user
+      }
+    };
+  });
+
+// Rate limiting middleware
+const rateLimitMiddleware = (app: Elysia) => {
+  const requests = new Map<string, number[]>();
+  const WINDOW_SIZE = 60 * 1000; // 1 minute
+  const MAX_REQUESTS = 10;
+  
+  return app.onBeforeHandle(({ request, set }) => {
+    const ip = "127.0.0.1"; // In production, get real IP
+    const now = Date.now();
+    
+    if (!requests.has(ip)) {
+      requests.set(ip, []);
+    }
+    
+    const userRequests = requests.get(ip)!;
+    
+    // Remove old requests outside the window
+    const validRequests = userRequests.filter(time => now - time < WINDOW_SIZE);
+    
+    if (validRequests.length >= MAX_REQUESTS) {
+      set.status = 429;
+      return "Too many requests";
+    }
+    
+    validRequests.push(now);
+    requests.set(ip, validRequests);
+  });
+};
+
+const app = new Elysia()
+  // Add plugins
+  .use(cors())
+  .use(swagger({
+    documentation: {
+      info: {
+        title: "Blog API",
+        version: "1.0.0",
+        description: "A simple blog API built with Elysia"
+      }
+    }
+  }))
+  
+  // Add custom middleware
+  .use(authMiddleware)
+  .use(rateLimitMiddleware)
+  
+  // Protected route that requires authentication
+  .group("/admin", (app) =>
+    app
+      .guard({
+        beforeHandle({ auth, set }) {
+          if (!auth.isAuthenticated || auth.user?.role !== "admin") {
+            set.status = 401;
+            return "Unauthorized";
+          }
+        }
+      })
+      .get("/dashboard", ({ auth }) => ({
+        message: `Welcome admin ${auth.user?.name}`,
+        stats: {
+          totalPosts: posts.length,
+          totalUsers: users.length
+        }
+      }))
+      .delete("/posts/:id", ({ params }) => {
+        // Admin can delete any post
+        const postIndex = posts.findIndex(p => p.id === params.id);
+        if (postIndex === -1) {
+          return new Response("Post not found", { status: 404 });
+        }
+        
+        posts.splice(postIndex, 1);
+        return { message: "Post deleted by admin" };
+      })
+  )
+  
+  .listen(3000);
+```
+
+# Database Integration
+
+In production, you'd integrate with a real database. Here's an example using Drizzle ORM:
+
+```ts
+// First install: bun add drizzle-orm postgres
+// bun add -d drizzle-kit @types/pg
+
+import { Elysia, t } from "elysia";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { pgTable, serial, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { eq, like, and } from "drizzle-orm";
+import postgres from "postgres";
+
+// Database connection
+const queryClient = postgres("postgresql://user:password@localhost:5432/blogdb");
+const db = drizzle(queryClient);
+
+// Database schema
+const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  author: text("author").notNull(),
+  published: boolean("published").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+const app = new Elysia()
+  // Get all posts with database
+  .get("/posts", async ({ query }) => {
+    let whereConditions = [];
+    
+    if (query.author) {
+      whereConditions.push(like(posts.author, `%${query.author}%`));
+    }
+    
+    if (query.published !== undefined) {
+      whereConditions.push(eq(posts.published, query.published));
+    }
+    
+    const allPosts = await db
+      .select()
+      .from(posts)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(posts.createdAt);
+    
+    return { posts: allPosts };
+  }, {
+    query: t.Object({
+      author: t.Optional(t.String()),
+      published: t.Optional(t.Boolean())
+    })
+  })
+  
+  // Create post with database
+  .post("/posts", async ({ body }) => {
+    const [newPost] = await db
+      .insert(posts)
+      .values({
+        title: body.title,
+        content: body.content,
+        author: body.author,
+        published: body.published
+      })
+      .returning();
+    
+    return newPost;
+  }, {
+    body: t.Object({
+      title: t.String(),
+      content: t.String(),
+      author: t.String(),
+      published: t.Boolean()
+    })
+  })
+  
+  .listen(3000);
+```
+
+# Error Handling
+
+Proper error handling is crucial for production APIs:
+
+```ts
+import { Elysia, t } from "elysia";
+
+class APIError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number = 500,
+    public code?: string
+  ) {
+    super(message);
+    this.name = "APIError";
+  }
+}
+
+const app = new Elysia()
+  // Global error handler
+  .onError(({ error, code, set }) => {
+    console.error("API Error:", error);
+    
+    if (error instanceof APIError) {
+      set.status = error.statusCode;
+      return {
+        error: true,
+        message: error.message,
+        code: error.code || "API_ERROR"
+      };
+    }
+    
+    // Validation errors
+    if (code === "VALIDATION") {
+      set.status = 400;
+      return {
+        error: true,
+        message: "Validation failed",
+        code: "VALIDATION_ERROR",
+        details: error.message
+      };
+    }
+    
+    // Default error
+    set.status = 500;
+    return {
+      error: true,
+      message: "Internal server error",
+      code: "INTERNAL_ERROR"
+    };
+  })
+  
+  .get("/posts/:id", ({ params }) => {
+    const post = posts.find(p => p.id === params.id);
+    
+    if (!post) {
+      throw new APIError("Post not found", 404, "POST_NOT_FOUND");
+    }
+    
+    return post;
+  })
+  
+  .post("/posts", ({ body }) => {
+    // Business logic validation
+    if (body.title.includes("spam")) {
+      throw new APIError("Post contains prohibited content", 400, "CONTENT_FORBIDDEN");
+    }
+    
+    try {
+      // Simulate database operation that might fail
+      const post = createPost(body);
+      return post;
+    } catch (error) {
+      throw new APIError("Failed to create post", 500, "CREATE_FAILED");
+    }
+  })
+  
+  .listen(3000);
+```
+
+# Puzzle
+
+Build a complete Task Management API with advanced features:
+
+1. **Project Setup**: Create a new Elysia project
+
+2. **Data Models**: Define these TypeScript interfaces and schemas:
+   ```ts
+   interface User {
+     id: string;
+     username: string;
+     email: string;
+     role: "user" | "admin";
+     createdAt: string;
+   }
+
+   interface Project {
+     id: string;
+     name: string;
+     description: string;
+     ownerId: string;
+     members: string[];
+     createdAt: string;
+   }
+
+   interface Task {
+     id: string;
+     title: string;
+     description: string;
+     status: "todo" | "in_progress" | "review" | "done";
+     priority: "low" | "medium" | "high";
+     assigneeId?: string;
+     projectId: string;
+     dueDate?: string;
+     createdAt: string;
+     updatedAt: string;
+   }
+   ```
+
+3. **API Endpoints**: Implement these REST endpoints:
+   - **Users**: CRUD operations, authentication
+   - **Projects**: CRUD with member management
+   - **Tasks**: CRUD with filtering, assignment, status updates
+   - **Search**: Full-text search across tasks and projects
+   - **Analytics**: Task completion stats, project progress
+
+4. **Advanced Features**:
+   - JWT authentication with middleware
+   - Role-based access control (users can only access their projects)
+   - Input validation with detailed error messages
+   - Pagination for all list endpoints
+   - File upload for task attachments
+   - Real-time updates using WebSockets
+   - API versioning (/v1/, /v2/)
+   - Request logging and rate limiting
+
+5. **Database**: Use in-memory storage with these operations:
+   - Complex filtering (by status, priority, assignee, date range)
+   - Sorting (by created date, due date, priority)
+   - Aggregations (task counts by status, overdue tasks)
+
+6. **Security**: Implement:
+   - Password hashing for user accounts
+   - JWT token generation and validation
+   - Input sanitization
+   - CORS configuration
+   - Request size limits
+
+7. **Documentation**: Use Swagger plugin for API documentation
+
+Starter code structure:
+
+```ts
+// src/types.ts
+export interface User {
+  // Define your interfaces
+}
+
+// src/middleware/auth.ts
+import { Elysia } from "elysia";
+
+export const authMiddleware = (app: Elysia) =>
+  app.derive(({ headers }) => {
+    // Implement JWT validation
+  });
+
+// src/routes/users.ts
+import { Elysia, t } from "elysia";
+
+export const userRoutes = new Elysia({ prefix: "/users" })
+  .post("/register", ({ body }) => {
+    // Implement user registration
+  }, {
+    body: t.Object({
+      username: t.String({ minLength: 3 }),
+      email: t.String({ format: "email" }),
+      password: t.String({ minLength: 6 })
+    })
+  })
+  .post("/login", ({ body }) => {
+    // Implement user login
+  })
+  .get("/profile", ({ auth }) => {
+    // Get current user profile
+  });
+
+// src/routes/projects.ts
+export const projectRoutes = new Elysia({ prefix: "/projects" })
+  .get("/", ({ query, auth }) => {
+    // Get user's projects with pagination
+  })
+  .post("/", ({ body, auth }) => {
+    // Create new project
+  })
+  .get("/:id", ({ params, auth }) => {
+    // Get project details
+  })
+  .put("/:id", ({ params, body, auth }) => {
+    // Update project
+  })
+  .delete("/:id", ({ params, auth }) => {
+    // Delete project
+  })
+  .post("/:id/members", ({ params, body, auth }) => {
+    // Add member to project
+  });
+
+// src/routes/tasks.ts
+export const taskRoutes = new Elysia({ prefix: "/tasks" })
+  .get("/", ({ query, auth }) => {
+    // Get tasks with filtering and pagination
+  })
+  .post("/", ({ body, auth }) => {
+    // Create new task
+  })
+  .put("/:id", ({ params, body, auth }) => {
+    // Update task
+  })
+  .put("/:id/status", ({ params, body, auth }) => {
+    // Update task status
+  })
+  .delete("/:id", ({ params, auth }) => {
+    // Delete task
+  });
+
+// src/index.ts
+import { Elysia } from "elysia";
+import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
+import { authMiddleware } from "./middleware/auth";
+import { userRoutes } from "./routes/users";
+import { projectRoutes } from "./routes/projects";
+import { taskRoutes } from "./routes/tasks";
+
+const app = new Elysia()
+  .use(cors())
+  .use(swagger({
+    documentation: {
+      info: {
+        title: "Task Management API",
+        version: "1.0.0"
+      }
+    }
+  }))
+  .use(authMiddleware)
+  .use(userRoutes)
+  .use(projectRoutes)
+  .use(taskRoutes)
+  
+  .get("/", () => "Task Management API v1.0.0")
+  
+  .listen(3000);
+
+console.log("🚀 Task Management API running on http://localhost:3000");
+```
+
+Your API should be production-ready with proper error handling, security, documentation, and comprehensive testing endpoints. Include rate limiting, logging, and performance optimizations. Submit your complete API implementation with all features working!

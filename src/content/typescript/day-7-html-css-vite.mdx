@@ -1,0 +1,605 @@
+# Day Seven
+
+Today we're moving from pure TypeScript into web development. We'll learn how to use HTML and CSS with Vite, a fast build tool that makes web development smooth and enjoyable.
+
+# What is Vite?
+
+Vite is a build tool that provides a fast development environment for modern web projects. Unlike traditional bundlers, Vite serves your code via native ES modules during development, making it incredibly fast.
+
+Key features:
+- **Instant server start** - No bundling during development
+- **Hot Module Replacement (HMR)** - Changes update instantly in the browser
+- **Built-in TypeScript support** - No additional configuration needed
+- **Optimized builds** - Uses Rollup for production builds
+
+# Setting Up a Vite Project
+
+Let's create a new Vite project with TypeScript:
+
+```bash
+# Create a new Vite project
+bun create vite my-web-app --template vanilla-ts
+cd my-web-app
+
+# Install dependencies
+bun install
+
+# Start development server
+bun run dev
+```
+
+This creates a project structure like:
+
+```
+my-web-app/
+├── src/
+│   ├── main.ts
+│   ├── style.css
+│   └── vite-env.d.ts
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+```
+
+# HTML Fundamentals
+
+HTML (HyperText Markup Language) structures web content using elements:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Web App</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <header>
+    <h1>Welcome to My App</h1>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home">
+      <h2>Home Section</h2>
+      <p>This is the main content area.</p>
+      
+      <div class="card">
+        <h3>Feature Card</h3>
+        <p>Description of the feature.</p>
+        <button type="button">Learn More</button>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>About Us</h2>
+      <img src="/images/team.jpg" alt="Our team">
+      <p>We build amazing web applications.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 My Web App</p>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
+```
+
+## Common HTML Elements
+
+```html
+<!-- Text Elements -->
+<h1>Main Heading</h1>
+<h2>Subheading</h2>
+<p>Paragraph text</p>
+<span>Inline text</span>
+<strong>Bold text</strong>
+<em>Italic text</em>
+
+<!-- Links and Media -->
+<a href="https://example.com">External Link</a>
+<img src="/image.jpg" alt="Description">
+
+<!-- Lists -->
+<ul>
+  <li>Unordered list item</li>
+  <li>Another item</li>
+</ul>
+
+<ol>
+  <li>Ordered list item</li>
+  <li>Second item</li>
+</ol>
+
+<!-- Forms -->
+<form>
+  <label for="name">Name:</label>
+  <input type="text" id="name" name="name" required>
+  
+  <label for="email">Email:</label>
+  <input type="email" id="email" name="email" required>
+  
+  <button type="submit">Submit</button>
+</form>
+
+<!-- Structure -->
+<div class="container">Generic container</div>
+<section>Thematic grouping</section>
+<article>Self-contained content</article>
+<aside>Sidebar content</aside>
+```
+
+# CSS Fundamentals
+
+CSS (Cascading Style Sheets) controls the visual presentation of HTML:
+
+```css
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f4f4f4;
+}
+
+/* Layout */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #3498db;
+}
+
+/* Components */
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  nav ul {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .container {
+    padding: 0 10px;
+  }
+}
+```
+
+## CSS Selectors
+
+```css
+/* Element selector */
+p { color: blue; }
+
+/* Class selector */
+.highlight { background-color: yellow; }
+
+/* ID selector */
+#header { font-size: 2rem; }
+
+/* Attribute selector */
+input[type="email"] { border: 2px solid green; }
+
+/* Descendant selector */
+.card p { margin-bottom: 1rem; }
+
+/* Child selector */
+.nav > li { display: inline-block; }
+
+/* Pseudo-classes */
+a:hover { color: red; }
+button:active { transform: scale(0.98); }
+input:focus { outline: 2px solid blue; }
+
+/* Pseudo-elements */
+p::first-line { font-weight: bold; }
+.quote::before { content: """; }
+```
+
+# Connecting TypeScript
+
+Now let's add interactivity with TypeScript:
+
+```ts
+// src/main.ts
+interface TodoItem {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+
+class TodoApp {
+  private todos: TodoItem[] = [];
+  private nextId = 1;
+  private todoList: HTMLElement;
+  private todoInput: HTMLInputElement;
+
+  constructor() {
+    this.todoList = document.getElementById("todo-list")!;
+    this.todoInput = document.getElementById("todo-input") as HTMLInputElement;
+    
+    this.setupEventListeners();
+    this.render();
+  }
+
+  private setupEventListeners(): void {
+    const addButton = document.getElementById("add-todo");
+    addButton?.addEventListener("click", () => this.addTodo());
+    
+    this.todoInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        this.addTodo();
+      }
+    });
+  }
+
+  private addTodo(): void {
+    const text = this.todoInput.value.trim();
+    if (!text) return;
+
+    const todo: TodoItem = {
+      id: this.nextId++,
+      text,
+      completed: false
+    };
+
+    this.todos.push(todo);
+    this.todoInput.value = "";
+    this.render();
+  }
+
+  private toggleTodo(id: number): void {
+    const todo = this.todos.find(t => t.id === id);
+    if (todo) {
+      todo.completed = !todo.completed;
+      this.render();
+    }
+  }
+
+  private deleteTodo(id: number): void {
+    this.todos = this.todos.filter(t => t.id !== id);
+    this.render();
+  }
+
+  private render(): void {
+    this.todoList.innerHTML = "";
+
+    this.todos.forEach(todo => {
+      const li = document.createElement("li");
+      li.className = `todo-item ${todo.completed ? "completed" : ""}`;
+      
+      li.innerHTML = `
+        <span class="todo-text">${todo.text}</span>
+        <div class="todo-actions">
+          <button class="toggle-btn" data-id="${todo.id}">
+            ${todo.completed ? "Undo" : "Done"}
+          </button>
+          <button class="delete-btn" data-id="${todo.id}">Delete</button>
+        </div>
+      `;
+
+      // Add event listeners
+      const toggleBtn = li.querySelector(".toggle-btn") as HTMLButtonElement;
+      const deleteBtn = li.querySelector(".delete-btn") as HTMLButtonElement;
+      
+      toggleBtn.addEventListener("click", () => this.toggleTodo(todo.id));
+      deleteBtn.addEventListener("click", () => this.deleteTodo(todo.id));
+
+      this.todoList.appendChild(li);
+    });
+  }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener("DOMContentLoaded", () => {
+  new TodoApp();
+});
+```
+
+And the corresponding HTML:
+
+```html
+<!-- Add this to your index.html body -->
+<div class="todo-app">
+  <h2>Todo List</h2>
+  <div class="todo-input-container">
+    <input type="text" id="todo-input" placeholder="Add a new todo...">
+    <button id="add-todo">Add</button>
+  </div>
+  <ul id="todo-list"></ul>
+</div>
+```
+
+# CSS Grid and Flexbox
+
+Modern CSS layout systems make complex layouts easy:
+
+```css
+/* Flexbox for one-dimensional layouts */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+/* CSS Grid for two-dimensional layouts */
+.dashboard {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas: 
+    "sidebar header"
+    "sidebar main"
+    "sidebar footer";
+  min-height: 100vh;
+}
+
+.sidebar { grid-area: sidebar; }
+.header { grid-area: header; }
+.main { grid-area: main; }
+.footer { grid-area: footer; }
+
+/* Responsive grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+```
+
+# Working with Assets
+
+Vite handles assets efficiently:
+
+```ts
+// Import CSS
+import "./style.css";
+
+// Import images
+import logoUrl from "./assets/logo.png";
+
+// Import JSON
+import config from "./config.json";
+
+// Use imported assets
+const img = document.createElement("img");
+img.src = logoUrl;
+img.alt = "Logo";
+document.body.appendChild(img);
+```
+
+# Hot Module Replacement
+
+Vite's HMR updates your app without losing state:
+
+```ts
+// Enable HMR for this module
+if (import.meta.hot) {
+  import.meta.hot.accept((newModule) => {
+    // Handle module updates
+    console.log("Module updated!");
+  });
+}
+```
+
+# Puzzle
+
+Build a personal dashboard web application with the following features:
+
+1. **Project Setup**: Create a new Vite + TypeScript project
+
+2. **HTML Structure**: Create a dashboard layout with:
+   - Header with navigation
+   - Sidebar with menu items
+   - Main content area with widgets
+   - Footer
+
+3. **CSS Styling**: Use modern CSS features:
+   - CSS Grid for the main layout
+   - Flexbox for component layouts
+   - CSS variables for theming
+   - Responsive design with media queries
+   - Smooth transitions and hover effects
+
+4. **TypeScript Functionality**: Implement these interactive widgets:
+   - **Weather Widget**: Display current weather (you can mock the data)
+   - **Todo Widget**: Add/remove/toggle todo items with local storage
+   - **Clock Widget**: Show current time that updates every second
+   - **Calculator Widget**: Basic arithmetic operations
+
+5. **Requirements**:
+   - Use proper TypeScript types for all data
+   - Implement proper DOM manipulation
+   - Store todo data in localStorage
+   - Make it responsive for mobile devices
+   - Add loading states and error handling
+
+6. **Bonus Features**:
+   - Theme switcher (light/dark mode)
+   - Drag and drop to reorder widgets
+   - Export todo list as JSON
+
+Starter files:
+
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Personal Dashboard</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
+```
+
+```css
+/* src/style.css */
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2c3e50;
+  --background-color: #f8f9fa;
+  --text-color: #333;
+  --border-color: #e9ecef;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Add your styles here */
+```
+
+```ts
+// src/main.ts
+import "./style.css";
+
+interface Widget {
+  id: string;
+  title: string;
+  render(): HTMLElement;
+}
+
+class Dashboard {
+  private widgets: Widget[] = [];
+  
+  constructor() {
+    this.init();
+  }
+  
+  private init(): void {
+    // Initialize your dashboard here
+  }
+}
+
+// Weather Widget
+class WeatherWidget implements Widget {
+  id = "weather";
+  title = "Weather";
+  
+  render(): HTMLElement {
+    // Implementation here
+    return document.createElement("div");
+  }
+}
+
+// Todo Widget  
+class TodoWidget implements Widget {
+  id = "todo";
+  title = "Todo List";
+  
+  render(): HTMLElement {
+    // Implementation here
+    return document.createElement("div");
+  }
+}
+
+// Clock Widget
+class ClockWidget implements Widget {
+  id = "clock";
+  title = "Clock";
+  
+  render(): HTMLElement {
+    // Implementation here
+    return document.createElement("div");
+  }
+}
+
+// Calculator Widget
+class CalculatorWidget implements Widget {
+  id = "calculator";
+  title = "Calculator";
+  
+  render(): HTMLElement {
+    // Implementation here
+    return document.createElement("div");
+  }
+}
+
+new Dashboard();
+```
+
+Test your dashboard by running `bun run dev` and ensure all widgets work correctly. Submit your complete project files when finished!

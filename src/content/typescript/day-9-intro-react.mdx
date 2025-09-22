@@ -1,0 +1,800 @@
+# Day Nine
+
+Today we're introducing React, the most popular library for building user interfaces. React revolutionizes web development by introducing a component-based architecture and declarative programming model.
+
+# What is React?
+
+React is a JavaScript library for building user interfaces, created by Facebook (now Meta). It allows you to build complex UIs by composing small, reusable components.
+
+Key concepts:
+- **Components**: Reusable pieces of UI
+- **JSX**: A syntax extension that looks like HTML but is actually JavaScript
+- **Virtual DOM**: React's efficient way of updating the actual DOM
+- **State**: Data that can change over time
+- **Props**: Data passed from parent to child components
+
+# Setting Up React with Vite
+
+Let's create a new React project with TypeScript support:
+
+```bash
+# Create a new React + TypeScript project
+bun create vite my-react-app --template react-ts
+cd my-react-app
+
+# Install dependencies
+bun install
+
+# Start development server
+bun run dev
+```
+
+This creates a project structure like:
+
+```
+my-react-app/
+├── src/
+│   ├── components/
+│   ├── App.tsx
+│   ├── main.tsx
+│   └── index.css
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+```
+
+# Your First React Component
+
+React components are functions that return JSX:
+
+```tsx
+// src/components/Greeting.tsx
+import React from "react";
+
+interface GreetingProps {
+  name: string;
+  age?: number;
+}
+
+function Greeting({ name, age }: GreetingProps) {
+  return (
+    <div className="greeting">
+      <h1>Hello, {name}!</h1>
+      {age && <p>You are {age} years old.</p>}
+    </div>
+  );
+}
+
+export default Greeting;
+```
+
+```tsx
+// src/App.tsx
+import React from "react";
+import Greeting from "./components/Greeting";
+
+function App() {
+  return (
+    <div className="app">
+      <Greeting name="Alice" age={25} />
+      <Greeting name="Bob" />
+    </div>
+  );
+}
+
+export default App;
+```
+
+# JSX Fundamentals
+
+JSX looks like HTML but has some important differences:
+
+```tsx
+function JSXExample() {
+  const message = "Welcome to React!";
+  const isLoggedIn = true;
+  const users = ["Alice", "Bob", "Charlie"];
+
+  return (
+    <div>
+      {/* JavaScript expressions go in curly braces */}
+      <h1>{message}</h1>
+      
+      {/* Conditional rendering */}
+      {isLoggedIn ? (
+        <p>Welcome back!</p>
+      ) : (
+        <p>Please log in.</p>
+      )}
+      
+      {/* Lists and mapping */}
+      <ul>
+        {users.map((user, index) => (
+          <li key={index}>{user}</li>
+        ))}
+      </ul>
+      
+      {/* CSS classes use className instead of class */}
+      <div className="container">
+        <p>This has a CSS class</p>
+      </div>
+      
+      {/* Inline styles use objects */}
+      <p style={{ color: "blue", fontSize: "18px" }}>
+        Styled text
+      </p>
+      
+      {/* Event handlers */}
+      <button onClick={() => alert("Clicked!")}>
+        Click Me
+      </button>
+    </div>
+  );
+}
+```
+
+# State Management with useState
+
+State allows components to have data that can change over time:
+
+```tsx
+import React, { useState } from "react";
+
+interface CounterProps {
+  initialCount?: number;
+}
+
+function Counter({ initialCount = 0 }: CounterProps) {
+  // useState returns [currentValue, setterFunction]
+  const [count, setCount] = useState<number>(initialCount);
+
+  const increment = () => {
+    setCount(count + 1);
+    // Or use the functional update pattern:
+    // setCount(prevCount => prevCount + 1);
+  };
+
+  const decrement = () => {
+    setCount(count - 1);
+  };
+
+  const reset = () => {
+    setCount(initialCount);
+  };
+
+  return (
+    <div className="counter">
+      <h2>Count: {count}</h2>
+      <div className="buttons">
+        <button onClick={increment}>+</button>
+        <button onClick={decrement}>-</button>
+        <button onClick={reset}>Reset</button>
+      </div>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+# Complex State with Objects and Arrays
+
+```tsx
+import React, { useState } from "react";
+
+interface Todo {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+
+function TodoList() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [inputText, setInputText] = useState<string>("");
+  const [nextId, setNextId] = useState<number>(1);
+
+  const addTodo = () => {
+    if (inputText.trim()) {
+      const newTodo: Todo = {
+        id: nextId,
+        text: inputText.trim(),
+        completed: false
+      };
+      
+      setTodos([...todos, newTodo]);
+      setInputText("");
+      setNextId(nextId + 1);
+    }
+  };
+
+  const toggleTodo = (id: number) => {
+    setTodos(todos.map(todo =>
+      todo.id === id
+        ? { ...todo, completed: !todo.completed }
+        : todo
+    ));
+  };
+
+  const deleteTodo = (id: number) => {
+    setTodos(todos.filter(todo => todo.id !== id));
+  };
+
+  const completedCount = todos.filter(todo => todo.completed).length;
+
+  return (
+    <div className="todo-list">
+      <h2>Todo List ({completedCount}/{todos.length} completed)</h2>
+      
+      <div className="add-todo">
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && addTodo()}
+          placeholder="Add a new todo..."
+        />
+        <button onClick={addTodo}>Add</button>
+      </div>
+
+      <ul className="todos">
+        {todos.map(todo => (
+          <li key={todo.id} className={todo.completed ? "completed" : ""}>
+            <input
+              type="checkbox"
+              checked={todo.completed}
+              onChange={() => toggleTodo(todo.id)}
+            />
+            <span>{todo.text}</span>
+            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+# Props and Component Communication
+
+Props are how data flows from parent to child components:
+
+```tsx
+// Child component
+interface UserCardProps {
+  user: {
+    id: number;
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  onEdit: (userId: number) => void;
+  onDelete: (userId: number) => void;
+  showActions?: boolean;
+}
+
+function UserCard({ user, onEdit, onDelete, showActions = true }: UserCardProps) {
+  return (
+    <div className="user-card">
+      {user.avatar && (
+        <img src={user.avatar} alt={`${user.name}'s avatar`} />
+      )}
+      <div className="user-info">
+        <h3>{user.name}</h3>
+        <p>{user.email}</p>
+      </div>
+      
+      {showActions && (
+        <div className="actions">
+          <button onClick={() => onEdit(user.id)}>Edit</button>
+          <button onClick={() => onDelete(user.id)}>Delete</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Parent component
+function UserList() {
+  const [users, setUsers] = useState([
+    { id: 1, name: "Alice Johnson", email: "alice@example.com" },
+    { id: 2, name: "Bob Smith", email: "bob@example.com" },
+  ]);
+
+  const handleEdit = (userId: number) => {
+    console.log(`Edit user ${userId}`);
+    // Implementation for editing
+  };
+
+  const handleDelete = (userId: number) => {
+    setUsers(users.filter(user => user.id !== userId));
+  };
+
+  return (
+    <div className="user-list">
+      <h2>Users</h2>
+      {users.map(user => (
+        <UserCard
+          key={user.id}
+          user={user}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+# Effects with useEffect
+
+useEffect lets you perform side effects in functional components:
+
+```tsx
+import React, { useState, useEffect } from "react";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+function UserProfile({ userId }: { userId: number }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Effect runs after component mounts and when userId changes
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`/api/users/${userId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch user");
+        }
+        
+        const userData = await response.json();
+        setUser(userData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [userId]); // Dependencies array - effect runs when userId changes
+
+  // Cleanup effect (optional)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      console.log("Component is alive");
+    }, 1000);
+
+    // Cleanup function - runs when component unmounts
+    return () => {
+      clearInterval(timer);
+    };
+  }, []); // Empty dependencies - runs once on mount
+
+  if (loading) return <div>Loading user...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!user) return <div>User not found</div>;
+
+  return (
+    <div className="user-profile">
+      <h2>{user.name}</h2>
+      <p>Email: {user.email}</p>
+    </div>
+  );
+}
+```
+
+# Custom Hooks
+
+Custom hooks let you reuse stateful logic between components:
+
+```tsx
+import { useState, useEffect } from "react";
+
+// Custom hook for API calls
+function useApi<T>(url: string) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+// Custom hook for local storage
+function useLocalStorage<T>(key: string, initialValue: T) {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  });
+
+  const setStoredValue = (value: T | ((val: T) => T)) => {
+    try {
+      const valueToStore = value instanceof Function ? value(value) : value;
+      setValue(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(`Error setting localStorage key "${key}":`, error);
+    }
+  };
+
+  return [value, setStoredValue] as const;
+}
+
+// Using custom hooks
+function PostList() {
+  const { data: posts, loading, error } = useApi<Post[]>("/api/posts");
+  const [favorites, setFavorites] = useLocalStorage<number[]>("favorites", []);
+
+  const toggleFavorite = (postId: number) => {
+    setFavorites(prev => 
+      prev.includes(postId)
+        ? prev.filter(id => id !== postId)
+        : [...prev, postId]
+    );
+  };
+
+  if (loading) return <div>Loading posts...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return (
+    <div className="post-list">
+      {posts?.map(post => (
+        <div key={post.id} className="post">
+          <h3>{post.title}</h3>
+          <p>{post.excerpt}</p>
+          <button onClick={() => toggleFavorite(post.id)}>
+            {favorites.includes(post.id) ? "❤️" : "🤍"}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+# Form Handling in React
+
+```tsx
+import React, { useState } from "react";
+
+interface FormData {
+  name: string;
+  email: string;
+  message: string;
+  subscribe: boolean;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  message?: string;
+}
+
+function ContactForm() {
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    email: "",
+    message: "",
+    subscribe: false
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid";
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = "Message is required";
+    } else if (formData.message.length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
+    }
+
+    return newErrors;
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value
+    }));
+
+    // Clear error when user starts typing
+    if (errors[name as keyof FormErrors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const newErrors = validateForm();
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      setIsSubmitting(true);
+      
+      try {
+        const response = await fetch("/api/contact", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          alert("Form submitted successfully!");
+          setFormData({
+            name: "",
+            email: "",
+            message: "",
+            subscribe: false
+          });
+        } else {
+          throw new Error("Failed to submit form");
+        }
+      } catch (error) {
+        alert("Error submitting form. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="contact-form">
+      <div className="form-group">
+        <label htmlFor="name">Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value={formData.name}
+          onChange={handleInputChange}
+          className={errors.name ? "error" : ""}
+        />
+        {errors.name && <span className="error-message">{errors.name}</span>}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleInputChange}
+          className={errors.email ? "error" : ""}
+        />
+        {errors.email && <span className="error-message">{errors.email}</span>}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="message">Message</label>
+        <textarea
+          id="message"
+          name="message"
+          value={formData.message}
+          onChange={handleInputChange}
+          className={errors.message ? "error" : ""}
+          rows={4}
+        />
+        {errors.message && <span className="error-message">{errors.message}</span>}
+      </div>
+
+      <div className="form-group">
+        <label>
+          <input
+            type="checkbox"
+            name="subscribe"
+            checked={formData.subscribe}
+            onChange={handleInputChange}
+          />
+          Subscribe to newsletter
+        </label>
+      </div>
+
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Submitting..." : "Submit"}
+      </button>
+    </form>
+  );
+}
+```
+
+# Puzzle
+
+Build a complete React application - a Personal Finance Tracker with the following features:
+
+1. **Project Setup**: Create a new React + TypeScript project with Vite
+
+2. **Data Types**: Define these TypeScript interfaces:
+   ```tsx
+   interface Transaction {
+     id: string;
+     amount: number;
+     description: string;
+     category: string;
+     date: Date;
+     type: "income" | "expense";
+   }
+
+   interface Category {
+     id: string;
+     name: string;
+     color: string;
+     icon: string;
+   }
+
+   interface Budget {
+     categoryId: string;
+     limit: number;
+     spent: number;
+   }
+   ```
+
+3. **Core Components**: Build these React components:
+   - **Dashboard**: Overview with total balance, recent transactions, budget progress
+   - **TransactionForm**: Add new income/expense transactions
+   - **TransactionList**: Display and filter transactions
+   - **CategoryManager**: Create and edit expense categories
+   - **BudgetTracker**: Set spending limits and track progress
+   - **Charts**: Visual representation of spending by category (use basic bar charts)
+
+4. **Features to Implement**:
+   - Add, edit, and delete transactions
+   - Categorize transactions with custom categories
+   - Filter transactions by date range, category, or type
+   - Set monthly budgets for categories
+   - Search transactions by description
+   - Calculate running balance and category totals
+   - Data persistence using localStorage
+   - Export data as CSV
+
+5. **State Management**: Use useState and useEffect hooks for:
+   - Managing transaction list
+   - Handling form state and validation
+   - Filtering and searching functionality
+   - Budget calculations and alerts
+
+6. **Custom Hooks**: Create these reusable hooks:
+   - `useLocalStorage`: For data persistence
+   - `useTransactions`: Manage transaction operations
+   - `useBudgets`: Handle budget calculations
+
+7. **Styling**: Use CSS modules or regular CSS for:
+   - Responsive layout
+   - Form styling with validation feedback
+   - Color-coded categories
+   - Progress bars for budgets
+   - Mobile-friendly design
+
+Starter code structure:
+
+```tsx
+// src/types.ts
+export interface Transaction {
+  id: string;
+  amount: number;
+  description: string;
+  category: string;
+  date: Date;
+  type: "income" | "expense";
+}
+
+// Add other interfaces here
+
+// src/hooks/useLocalStorage.ts
+import { useState, useEffect } from "react";
+
+export function useLocalStorage<T>(key: string, initialValue: T) {
+  // Implementation here
+}
+
+// src/components/Dashboard.tsx
+import React from "react";
+import { Transaction } from "../types";
+
+interface DashboardProps {
+  transactions: Transaction[];
+}
+
+export function Dashboard({ transactions }: DashboardProps) {
+  // Calculate totals, recent transactions, etc.
+  return (
+    <div className="dashboard">
+      {/* Dashboard content */}
+    </div>
+  );
+}
+
+// src/App.tsx
+import React, { useState } from "react";
+import { Dashboard } from "./components/Dashboard";
+import { TransactionForm } from "./components/TransactionForm";
+import { TransactionList } from "./components/TransactionList";
+import { Transaction } from "./types";
+
+function App() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "transactions" | "budgets">("dashboard");
+
+  // Implement transaction management logic
+
+  return (
+    <div className="app">
+      <nav>
+        {/* Navigation tabs */}
+      </nav>
+      
+      <main>
+        {activeTab === "dashboard" && <Dashboard transactions={transactions} />}
+        {activeTab === "transactions" && (
+          <>
+            <TransactionForm onAddTransaction={addTransaction} />
+            <TransactionList transactions={transactions} />
+          </>
+        )}
+        {/* Other tabs */}
+      </main>
+    </div>
+  );
+}
+
+export default App;
+```
+
+Your application should demonstrate proper React patterns, TypeScript integration, state management, and provide a complete user experience for managing personal finances. Include error handling, loading states, and form validation. Submit your complete React application!

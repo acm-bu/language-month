@@ -6,9 +6,8 @@ Today we're gonna be talking about functions.
 
 You can simply define a function like such:
 
-
 ```ts
-function fibonacci(n) {
+function fibonacci(n: number): number {
   if (n === 0) {
     return 0;
   } else if (n === 1) {
@@ -21,16 +20,205 @@ function fibonacci(n) {
 const result = fibonacci(10);
 ```
 
+Note that we specified the parameter type as `number` and the return type as `number`. While TypeScript can often infer types, it's good practice to be explicit with function signatures.
 
-You can also define functions anonymously. In javascript, functions are just variables that can be passed around like anything else. Here's an example:
+# Arrow Functions
+
+You can also define functions anonymously using arrow function syntax. In JavaScript, functions are just variables that can be passed around like anything else:
 
 ```ts
-
-const myFunction = () => {
-
+const add = (a: number, b: number): number => {
+  return a + b;
 }
 
+// For simple one-line functions, you can omit the braces and return keyword
+const multiply = (a: number, b: number): number => a * b;
+
+// If there's only one parameter, you can omit the parentheses
+const square = (x: number): number => x * x;
 ```
 
-This means that you can have functions that take other functions as input, or functions that return another function as output. You typically don't have to worry about scope. As a rule, if the variable is less indented than your function, you can use it. This allows for effective use of the [closure pattern](https://en.wikipedia.org/wiki/Closure_(computer_programming)).
+Arrow functions are especially useful for callback functions:
+
+```ts
+const numbers = [1, 2, 3, 4, 5];
+const doubled = numbers.map(x => x * 2);
+const evens = numbers.filter(x => x % 2 === 0);
+console.log(doubled); // [2, 4, 6, 8, 10]
+console.log(evens);   // [2, 4]
+```
+
+# Function Parameters
+
+Functions can have optional parameters, default values, and rest parameters:
+
+```ts
+// Optional parameters (use ?)
+function greet(name: string, age?: number): string {
+  if (age) {
+    return `Hello ${name}, you are ${age} years old!`;
+  }
+  return `Hello ${name}!`;
+}
+
+// Default parameters
+function createUser(name: string, role: string = "user"): object {
+  return { name, role };
+}
+
+// Rest parameters
+function sum(...numbers: number[]): number {
+  return numbers.reduce((total, num) => total + num, 0);
+}
+
+console.log(sum(1, 2, 3, 4)); // 10
+```
+
+# Higher-Order Functions
+
+This means that you can have functions that take other functions as input, or functions that return another function as output:
+
+```ts
+// Function that takes another function as parameter
+function applyOperation(x: number, y: number, operation: (a: number, b: number) => number): number {
+  return operation(x, y);
+}
+
+const addResult = applyOperation(5, 3, (a, b) => a + b);
+const multiplyResult = applyOperation(5, 3, (a, b) => a * b);
+
+// Function that returns another function
+function createMultiplier(factor: number): (x: number) => number {
+  return (x: number) => x * factor;
+}
+
+const double = createMultiplier(2);
+const triple = createMultiplier(3);
+
+console.log(double(5)); // 10
+console.log(triple(5)); // 15
+```
+
+# Closures
+
+You typically don't have to worry about scope. As a rule, if the variable is less indented than your function, you can use it. This allows for effective use of the [closure pattern](https://en.wikipedia.org/wiki/Closure_(computer_programming)):
+
+```ts
+function createCounter(): () => number {
+  let count = 0;
+  
+  return () => {
+    count++;
+    return count;
+  };
+}
+
+const counter1 = createCounter();
+const counter2 = createCounter();
+
+console.log(counter1()); // 1
+console.log(counter1()); // 2
+console.log(counter2()); // 1 (independent counter)
+```
+
+Each counter maintains its own `count` variable, demonstrating how closures capture their surrounding scope.
+
+# Array Methods
+
+JavaScript arrays have many built-in methods that use functions:
+
+```ts
+const students = [
+  { name: "Alice", grade: 85 },
+  { name: "Bob", grade: 92 },
+  { name: "Charlie", grade: 78 },
+  { name: "Diana", grade: 96 }
+];
+
+// map - transform each element
+const names = students.map(student => student.name);
+
+// filter - keep elements that match condition
+const highPerformers = students.filter(student => student.grade >= 90);
+
+// find - get first element that matches
+const alice = students.find(student => student.name === "Alice");
+
+// reduce - combine all elements into single value
+const averageGrade = students.reduce((sum, student) => sum + student.grade, 0) / students.length;
+
+console.log(names);          // ["Alice", "Bob", "Charlie", "Diana"]
+console.log(highPerformers); // [{ name: "Bob", grade: 92 }, { name: "Diana", grade: 96 }]
+console.log(averageGrade);   // 87.75
+```
+
+# Puzzle
+
+Create a functional programming library with the following functions:
+
+1. `pipe<T>(...functions: Function[]): (input: T) => any` - Combines multiple functions so that the output of one becomes the input of the next
+
+2. `curry<T, U, V>(fn: (a: T, b: U) => V): (a: T) => (b: U) => V` - Converts a function that takes multiple arguments into a series of functions that take one argument each
+
+3. `debounce<T extends (...args: any[]) => any>(fn: T, delay: number): T` - Returns a function that delays calling the original function until after `delay` milliseconds have passed since the last call
+
+4. `memoize<T extends (...args: any[]) => any>(fn: T): T` - Returns a function that caches the results of expensive function calls
+
+Use your functions to solve this problem: Given an array of strings, create a pipeline that:
+- Filters out strings shorter than 3 characters
+- Converts all strings to uppercase
+- Sorts them alphabetically
+- Joins them with " | "
+
+Starter code:
+
+```ts
+function pipe<T>(...functions: Function[]): (input: T) => any {
+  // Your implementation here
+}
+
+function curry<T, U, V>(fn: (a: T, b: U) => V): (a: T) => (b: U) => V {
+  // Your implementation here
+}
+
+function debounce<T extends (...args: any[]) => any>(fn: T, delay: number): T {
+  // Your implementation here
+}
+
+function memoize<T extends (...args: any[]) => any>(fn: T): T {
+  // Your implementation here
+}
+
+// Test your implementations
+const testStrings = ["hi", "hello", "a", "world", "typescript", "js", "programming"];
+
+// Create a pipeline to process the strings
+const processStrings = pipe(
+  // Add your pipeline functions here
+);
+
+console.log(processStrings(testStrings));
+// Expected output: "HELLO | PROGRAMMING | TYPESCRIPT | WORLD"
+
+// Test curry function
+const add = (a: number, b: number) => a + b;
+const curriedAdd = curry(add);
+console.log(curriedAdd(5)(3)); // Should output: 8
+
+// Test memoization with fibonacci
+const fibonacci = memoize((n: number): number => {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+});
+
+console.time("First call");
+console.log(fibonacci(40));
+console.timeEnd("First call");
+
+console.time("Second call");
+console.log(fibonacci(40)); // Should be much faster
+console.timeEnd("Second call");
+```
+
+Submit your solution when complete!
 
