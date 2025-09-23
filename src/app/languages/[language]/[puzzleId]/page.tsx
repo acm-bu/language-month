@@ -69,12 +69,7 @@ export default async function PuzzlePage({ params }: { params: Promise<{ languag
 
       <div className="grid grid-cols-1 gap-8">
         <div>
-          <div className="card bg-base-100 shadow-xl mb-8">
-            <div className="card-body">
-              <h2 className="card-title text-2xl mb-4">Problem Description</h2>
-              <PuzzleDescription language={language} id={puzzleId} />
-            </div>
-          </div>
+          <PuzzleDescription language={language} id={puzzleId} />
 
           <div className="lg:col-span-1">
             <div className="mt-8">

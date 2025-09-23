@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { postSolution, patchSolution } from "@/actions/solutions";
 import type { Solution } from "@/server/db/schema";
@@ -18,6 +18,7 @@ export default function SubmitSolutionModal({ isOpen, onClose, puzzleTitle, lang
   const [code, setCode] = useState(existingSolution?.code || "");
   const [explanation, setExplanation] = useState(existingSolution?.explanation || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     if (!code.trim() || !explanation.trim()) return;
@@ -32,12 +33,12 @@ export default function SubmitSolutionModal({ isOpen, onClose, puzzleTitle, lang
         setCode("");
         setExplanation("");
         onClose();
-        // Refresh the page to show updated state
-        window.location.reload();
+        router.push(result.data);
       } else {
         alert(`Error: ${result.error}`);
       }
     } catch (error) {
+      console.log(error);
       alert("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);

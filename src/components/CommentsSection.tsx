@@ -2,7 +2,6 @@
 import Giscus from "@giscus/react";
 
 export function CommentsSection() {
-  console.log("Rendering comments section");
   return (
     <Giscus
       repo="acm-bu/language-month"

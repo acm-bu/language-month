@@ -8,10 +8,6 @@
   --tokyonight-fg-color: #c0caf5;
 }
 
-article {
-  @apply prose;
-}
-
 
 pre {
   border: 1px solid var(--tokyonight-bg-color);

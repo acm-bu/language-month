@@ -5,8 +5,10 @@ export default async function PuzzleDescription({ language, id }: { language: st
   const Component = mod.default;
 
   return (
-    <article className="prose">
-      <Component />
-    </article>
+    <div className="w-full flex flex-col mt-16">
+      <article className="prose max-w-[800px] mx-auto">
+        <Component />
+      </article>
+    </div>
   )
 }
